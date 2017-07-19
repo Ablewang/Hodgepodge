@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>摇奖机</title>
+	<style>
+	*{margin:0;padding: 0;-webkit-user-select:none;}
+		.c-ernie{
+			height: 200px;
+			background: #eee;
+			border:1px solid #ddd;
+			border-radius: 8px;
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%,-50%);
+		}
+		.u-ernie{
+			display: flex;
+			height: 100%;
+		}
+		.u-ernie li{
+			height: 100%;
+			display: block;
+			list-style: none;
+			line-height: 200px;
+			margin:0 10px;
+		}
+		.u-ernie li span{
+			display: block;
+			height: 50px;
+			width: 50px;
+			border:3px solid #888;
+			margin-top: 100px;
+    		transform: translate(0,-50%);
+    		line-height: 50px;
+    		text-align: center;
+    		font-size: 27px;
+    		font-family: '微软雅黑';
+		}
+		.u-ernie li:nth-last-child(2) span,.u-ernie li:last-child span{
+			color:rgb(0,0,255);
+			border-color:rgb(0,0,255);
+		}
+		.btn-shade,.btn{
+			position: absolute;
+			width: 38px;
+			height: 38px;
+			line-height: 38px;
+			right: -45px;
+			border-radius: 5px;
+			top:100px;
+			margin-top: -20px;
+			background: #ddd;
+			cursor: pointer;
+			z-index: 0;
+			border:1px solid #ddd;
+			text-align: center;
+			cursor: pointer;
+		}
+		.btn{
+			background: #eee;
+			z-index: 1000;
+		}
+		.btn:hover{
+			background: #ddd;
+		}
+		.btn:active{
+			background: #fff;
+		}
+	</style>
+</head>
+<body>
+	<div class="c-ernie">
+		<ul id="box" class="u-ernie">
+			<li><span>0</span></li>
+			<li><span>0</span></li>
+			<li><span>0</span></li>
+			<li><span>0</span></li>
+			<li><span>0</span></li>
+			<li><span>0</span></li>
+			<li><span>0</span></li>
+			<li><span>0</span></li>
+		</ul>
+		<span class="btn" onclick="setWinningNumber(this);">摇奖</span>
+		<span class="btn-shade" id="btnShade">摇奖</span>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	let liSpan = document.getElementById('box').getElementsByTagName('span');
+	let max = 35;
+	let exMax = 10;
+	let exMaxLen = 2;
+	let timeBase = 20;
+	let init = (m)=>{
+		let t = [];
+		for (let i = 1; i <= m; i++) {
+			t.push(i);
+		}
+		return t;
+	};
+
+	function getRandom(){
+		let res = [];
+		let arr = init(max);
+		let extra = init(exMax);
+
+		let len = arr.length - 1;
+		let exLen = extra.length - 1;
+
+		let maxLen = liSpan.length - 2;
+		for (let i = 0; i < maxLen; i++) {
+			let cur = Math.floor(Math.random()*len)
+			res.push(arr[cur]);
+			arr[cur] = arr[len--];
+		}
+		for (var i = 0; i < exMaxLen; i++) {
+			let curEx = Math.floor(Math.random()*exLen)
+			res.push(extra[curEx]);
+			extra[curEx] = extra[exLen--];
+		}
+		return res;
+	}
+	
+
+	function initWinning(){
+		let numLst = getRandom();
+		for (let i = 0; i < numLst.length; i++) {
+			liSpan[i].innerHTML= numLst[i];
+		}
+	}
+
+	let timeIdx = {};
+	let timmer = [];
+
+	function initNumber(){
+		for (var i = 0; i < liSpan.length; i++) {
+			liSpan[i].innerHTML = 0;
+		}
+	}
+
+	function setWinningNumber(obj){
+		initNumber();
+		let shade = document.getElementById('btnShade');
+		shade.style.zIndex = 10000;
+		let numLst = getRandom();
+		let i = 0;
+		for (i = 0; i < numLst.length; i++) {
+			setRandomEffect(i,numLst[i],liSpan[i],i < numLst.length - 2 ? max : exMax);
+		}
+		timmer.push(
+			setTimeout(()=>{
+				shade.style.zIndex = 0;
+				timeIdx = {};
+				for (var i = 0; i < timmer.length; i++) {
+					clearTimeout(timmer[i]);
+				}
+			},timeBase*(timeIdx[i - 1] ++))
+		)
+	}
+
+	function setRandomEffect(id,res,obj,m){
+		if (!timeIdx[id]) {
+			timeIdx[id] = id * 5;
+		}
+		for (var i = 0; i < 100; i++) {
+			timmer.push(
+				setTimeout(((o,mm)=>{
+					return function(){
+						o.innerHTML = Math.floor(Math.random() * mm);
+					}
+				})(obj,m),timeBase*(timeIdx[id] ++))
+			)
+		}
+		timmer.push(
+			setTimeout(()=>{
+				obj.innerHTML = res;
+			},timeBase*(timeIdx[id] ++))
+		)
+	}
+
+</script>
