@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Binary Search Tree</title>
+	<style>
+		*{margin:0; padding: 0;}
+		body{text-align: center;}
+		.c-itm,.c-tree{
+			border:1px solid #5E5E5E;
+			min-width: 300px;
+			margin:0 auto;
+			margin-top: 30px;
+			padding: 0 10px;
+			border-radius: 8px;
+			position: relative;
+			width: 900px;
+		}
+		.c-itm ul{text-align: center;height: 50px;line-height: 50px;}
+		.n-li,.sp-li{
+			display: inline-block;
+			width: 30px;
+			height: 30px;
+			line-height: 30px;
+			border-radius: 30px;
+			font: bolder 14px/30px '微软雅黑';
+			margin:0 5px;
+			cursor: pointer;
+		}
+		.n-li{
+			background: #2D77FE;
+			color:#eee;
+		}
+		.n-li:hover{
+			background: #012AC0;
+		}
+		.sp-li{
+		    border: 1px dashed #444;
+		    box-sizing: border-box;
+		    background: #eee;
+		    color: #2D77FE;
+		}
+		.sp-li:hover{
+			background: #ddd;
+		}
+		.c-tree{
+			min-height: 600px;
+		}
+	</style>
+</head>
+<body>
+	<div class="c-itm">
+		<ul id="cUl" >
+		</ul>
+	</div>
+	<div id="cTree" class="c-tree">
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	let cTree = document.getElementById('cTree');
+	let array = getRandomArray(15,100);
+	let liArray = [];
+	let tree = {};//{index:1,item:obj,left:2,right:3,isRoot:true}
+	initLi(array);
+	initTree(liArray);
+	function initTree(liarr){
+		let rot = cTree[0];
+		tree[0]=getTreeNode(0,rot,0,0,true);
+
+		for (let i = 1; i < liarr.length; i++) {
+			let li = liarr[i];
+			setTimeout(()=>{
+				move(li,(cTree.offsetWidth / 2 - li.offsetWidth/2) + i*30 +'px',i * 40 + 'px');
+			},i * 500)
+		}
+	}
+
+	function move(li,left,top){
+		li.style.position = 'absolute';
+		li.style.left = left;
+		li.style.top = top;
+		let space = document.createElement('li');
+		space.setAttribute('class','sp-li');
+		space.innerHTML=li.innerHTML;
+		insertBefore(space,li);
+		cTree.appendChild(li);
+	}
+
+	function insertBefore(newElm,tagElm){
+		let parent = tagElm.parentNode;
+		if (parent.lastChild == tagElm) {
+			parent.appendChild(newElm);
+		}else{
+			parent.insertBefore(newElm,tagElm.nextSibling);
+		}
+	}
+
+	function getTreeNode(index,liItem,left,right,isRoot){
+		return {index:index,item:liItem,left:left,right:right,isRoot:isRoot};
+	}
+
+	function getPosition(item){
+		for (var i = 0; i < tree.length; i++) {
+			
+		}
+	}
+
+	function initLi(arr){
+		let conItem = document.getElementById('cUl');
+		conItem.innerHTML = '';
+		for (var i = 0; i < arr.length; i++) {
+			let li = document.createElement('li');
+			li.setAttribute('class','n-li');
+			li.innerHTML = arr[i];
+			liArray.push(li);
+			conItem.appendChild(li);
+		}
+	}
+
+	function getRandomArray(size,max){
+		let res = [];
+		let temp = [];
+		for (var i = 1; i <= max; i++) {
+			temp.push(i);
+		}
+		--max;
+		for (var i = 0; i < size; i++) {
+			let curIdx = Math.floor(Math.random()*max)
+			res.push(temp[curIdx]);
+			temp[curIdx] = temp[max --];
+		}
+		return res;
+	}
+</script>
