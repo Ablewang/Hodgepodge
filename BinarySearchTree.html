@@ -65,9 +65,9 @@
 	initLi(array);
 	initTree(liArray);
 	function initTree(liarr){
-		let rot = cTree[0];
+		let rot = liarr[0];
 		tree[0]=getTreeNode(0,rot,0,0,true);
-
+		move(rot,(cTree.offsetWidth / 2 - rot.offsetWidth/2) +'px', 'px');
 		for (let i = 1; i < liarr.length; i++) {
 			let li = liarr[i];
 			setTimeout(()=>{
