@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style>
+		*{margin:0;padding: 0}
+		body{overflow: hidden;}
+		.tip{padding-left:40px;width:100%;height: 30px;background-color: #111;line-height: 30px;}
+		.tip span{position: relative;display: inline-block;margin-left:30px;color:#fff;}
+		.tip span:before{
+			content:'';
+			position: absolute;
+			width:10px;
+			height: 10px;
+			margin-top:-5px;
+			top:15px;
+			left:-13px;
+		}
+		.handle:before{background-color: rgb(128,0,255);}
+		.area:before{background-color: rgb(0,255,255);}
+	</style>
+</head>
+<body>
+	<div class="tip">
+		<span class="area">当前遍处理的区域</span>
+		<span class="handle">当前处理区域整理</span>
+	</div>
+	<canvas id="canvas" style="background-color: #111;"></canvas>
+</body>
+</html>
+<script type="text/javascript">
+	let canvLeft = 50;
+	let canvTop = 30;
+	let canvas = document.getElementById('canvas');
+	let context = canvas.getContext('2d');
+	let w = window.innerWidth;
+	let h = window.innerHeight;
+	canvas.width = 	w;
+	canvas.height = h;
+	context.fillStyle="#000";
+	w -= canvLeft*2;
+	h -= canvTop + 500;
+	context.fillRect(canvLeft,canvTop,w,h);
+	let columnWidth = 20;
+	let space = 10;
+	let tpp = 50;
+	let lt = 60;
+	let baseColor = "#00cc33";
+	let areaColor = "rgb(0,255,255)";
+	let handelColor = "rgb(128,0,255)";
+	function getRandomArray(){
+		let array = [];
+		for (var i = 20; i >= 0; i--) {
+			array.push(Math.ceil(Math.random() * 200));
+		}
+		return array;
+	}
+	let arr = getRandomArray();
+	var ts = 1;
+	MergeSort(arr, 0, arr.length - 1);
+
+	function drawBase(length,tp,columnBegin,col,s,e){
+		if (!col) {
+			context.fillStyle= "#000";
+			context.fillRect(canvLeft,tp,w,h);
+		}
+		for (let i = 0; i < length; i++) {
+			context.fillStyle=!col ? handelColor : (i >= s && i <= e) ? areaColor : baseColor;
+			context.fillRect((i + columnBegin) * (columnWidth + space) + lt,tp,columnWidth,h);
+		}
+	}
+	function draw(array,tp,columnBegin,col,s,e){
+		drawBase(array.length,tp,columnBegin,col,s,e);
+		for (let i = 0; i <array.length; i++) {
+			context.fillStyle="#000";
+			context.fillRect((i + columnBegin) * (columnWidth + space) + lt,tp,columnWidth,h - array[i]);
+			context.fillStyle="#fff";
+			context.fillText(array[i],(i + columnBegin) * (columnWidth + space) + lt,tp + h - array[i] - 1);
+		}
+	}
+	function Merge(a,first, mid, last)  {
+		drawMergeArea(a,first,last,ts++);  
+		let temp = [];
+	    let i = first, j = mid + 1;  
+	    let m = mid,   n = last;  
+	    let k = 0;
+	    while (i <= m && j <= n)  
+	    {  
+	        if (a[i] <= a[j]){
+	        	temp[k++] = a[i++];
+    			drawMergeProgress(temp,first,ts++);
+	        }
+	        else{
+	            temp[k++] = a[j++];
+    			drawMergeProgress(temp,first,ts++);
+	        }
+	    }  
+	    while (i <= m){
+	        temp[k++] = a[i++];  
+    		drawMergeProgress(temp,first,ts++);
+	    }
+	      
+	    while (j <= n) {
+	        temp[k++] = a[j++];  
+    		drawMergeProgress(temp,first,ts++);
+	    }
+	    for (i = 0; i < k; i++) {
+	        a[first + i] = temp[i]; 
+	    } 
+		drawMergeArea(a,first,last,ts);  
+	} 
+	function drawMergeArea(arr,s,e,ttt){
+		let oa = [];
+		arr.map(function(itm){
+			oa.push(itm);
+		})
+		setTimeout(function(a,b,f){
+			return function(){
+				draw(a,tpp,0,true,b,f);
+			}
+		}(oa,s,e),ttt * 150);
+	}
+	function drawMergeProgress(temp,s,ttt){
+		let ot = [],oa = [];
+		temp.map(function(itm){
+			ot.push(itm);
+		})
+		arr.map(function(itm){
+			oa.push(itm);
+		})
+		setTimeout(function(t,b){
+			return function(){
+				draw(t,tpp + 300,b,false);
+			}
+		}(ot,s),ttt * 150);
+	}
+	function MergeSort(sourceArr,startIndex,  endIndex){
+	    let midIndex;
+	    if(startIndex < endIndex)
+	    {
+	        midIndex = parseInt((startIndex + endIndex) / 2);
+	        MergeSort(sourceArr,  startIndex, midIndex);
+	        MergeSort(sourceArr,  midIndex+1, endIndex);
+	        Merge(sourceArr, startIndex, midIndex, endIndex);
+	    }
+	}
+ 
+</script>

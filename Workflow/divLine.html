@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+      <title></title>
+      <style>
+            *{margin:0;padding: 0}
+            html,body{width:100%;height: 100%;overflow: hidden;}
+            .continer{
+                  position: absolute;
+                  height: 400px;
+                  width: 600px;
+                  border:1px solid #ddd;
+                  z-index: 2017;
+                  top:50%;
+                  left:50%;
+                  transform:translate(-50%,-50%);
+            }
+            .u-lst li{
+                  list-style: none;
+                  display: block;
+                  width: 80px;
+                  height: 30px;
+                  border:1px solid #fff;
+                  cursor:move;
+                  position: absolute;
+                  left:30px;
+                  z-index:2017;
+            }
+            .continer:before,.continer:after{
+                  content:'';
+                  position: absolute;
+                  width: 15px;
+                  height: 30px;
+                  background-color: #000;
+                  top :170px;
+                  border:1px solid #ccc;
+            }
+            .continer:before{
+                  border-left:0;
+                  left: -1px;
+                  border-radius: 0 15px 15px 0;
+            }
+
+            .continer:after{
+                  border-right:0;
+                  right: -1px;
+                  border-radius: 15px 0 0 15px;
+            }
+
+      </style>
+</head>
+<body>
+<canvas id="canvas" style="background: #000;z-index: 1;"></canvas>
+<div id="continer" class="continer">
+      <ul id="u_list" class="u-lst">
+            
+      </ul>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+      let curContiner = document.getElementById('continer');
+      let canvas = document.getElementById('canvas');
+      let w = document.body.clientWidth;
+      let h = document.body.clientHeight;
+      canvas.height = h;
+      canvas.width = w;
+      innitLi(5);
+      initLine();
+      function innitLi(len){
+            let ul = document.getElementById('u_list');
+            let res = [];
+            for (let i = 0; i < len; i++) {
+                  let li = document.createElement('li');
+                  li.setAttribute('data-index',i);
+                  li.setAttribute('relative',[Math.floor(Math.random()*len)]);
+                  li.style.top = i * 60 + 'px';
+                  drag(li);
+                  ul.appendChild(li);
+            }
+      }
+
+      function initLine(){
+            let lis = document.getElementById('u_list').children;
+            let lisDic = {};
+            for (let i = 0; i < lis.length; i ++) {
+                  lisDic[lis[i].getAttribute('data-index')||-1] = lis[i];
+            }
+            for (let i = 0; i < lis.length; i ++) {
+                  let rel = lis[i].getAttribute('relative')||-1;
+                  let cur = lis[i];
+                  let relItem = lisDic[rel];
+                  if (relItem && relItem != cur) {
+                        drawLine(cur,relItem);
+                  }
+            }
+
+      }
+      
+      function drawLine(objA,objB){
+            let oldx = document.getElementById('xline' + objA.getAttribute('data-index'));
+            let oldy = document.getElementById('yline' + objA.getAttribute('data-index'));
+            if (oldx) {curContiner.removeChild(oldx);}
+            if (oldy) {curContiner.removeChild(oldy);}
+            
+            let xA = objA.offsetLeft + objA.offsetWidth / 2,yA = objA.offsetTop + objA.offsetHeight / 2;
+            let xB = objB.offsetLeft + objB.offsetWidth / 2,yB = objB.offsetTop + objB.offsetHeight / 2;
+            let divHor = document.createElement('div');
+            let divver = document.createElement('div');
+            divHor.setAttribute('id','xline' + objA.getAttribute('data-index'));
+            divHor.style.position = 'absolute';
+            divHor.style.background = '#f00';
+            divHor.style.width = Math.abs((xA - xB)) + 'px';
+            divHor.style.height = '1px';
+            divHor.style.left = (xA < xB ? xB : xA) - parseInt(divHor.style.width) + 'px';
+            divHor.style.top = yA + 'px';
+            divHor.style.zIndex = 0;
+            curContiner.appendChild(divHor);
+
+            divver.setAttribute('id','yline' + objA.getAttribute('data-index'));
+            divver.style.position = 'absolute';
+            divver.style.background = '#f00';
+            divver.style.height = Math.abs((yA - yB)) + 'px';
+            divver.style.width = '1px';
+            divver.style.left = xB + 'px';
+            divver.style.top = (yB > yA ? yA : yB) - parseInt(divHor.style.height) + 1 + 'px';
+            divver.style.zIndex = 0;
+            curContiner.appendChild(divver);
+      }
+
+
+      let curX = 0,curY = 0;
+      let curObj = null;
+      document.onmousemove=function(e){
+            e = e ? e : event;
+            if (curObj) {
+                  let l = e.clientX - curX;
+                  let t = e.clientY - curY;
+                  l = l < 0 ? 0 : l > (curContiner.offsetWidth - curObj.offsetWidth) ? (curContiner.offsetWidth - curObj.offsetWidth) : l;
+                  t = t < 0 ? 0 : t > (curContiner.offsetHeight - curObj.offsetHeight) ? (curContiner.offsetHeight - curObj.offsetHeight) : t;
+                  curObj.style.left = l + 'px';
+                  curObj.style.top = t + 'px';
+                  initLine();
+            }
+      }
+      document.onmouseup = function(){
+            curObj = null;
+            curX = curY = 0;
+      }
+      function drag(obj){
+            obj.onmousedown=function(e){
+                  e = e ? e : event;
+                  curObj = obj;
+                  curX = e.clientX - obj.offsetLeft;
+                  curY = e.clientY - obj.offsetTop;
+            }
+      }
+</script>

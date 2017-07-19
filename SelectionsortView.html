@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style>
+		*{margin:0;padding: 0}
+		body{overflow: hidden;}
+		.tip{padding-left:40px;width:100%;height: 30px;background-color: #111;line-height: 30px;}
+		.tip span{position: relative;display: inline-block;margin-left:30px;color:#fff;}
+		.tip span:before{
+			content:'';
+			position: absolute;
+			width:10px;
+			height: 10px;
+			margin-top:-5px;
+			top:15px;
+			left:-13px;
+		}
+		.current:before{background-color: rgb(0,0,255);}
+		.select:before{background-color: rgb(128,0,255);}
+		.min:before{background-color: rgb(0,255,255);}
+	</style>
+</head>
+<body>
+	<div class="tip">
+		<span class="current">当前待排序</span>
+		<span class="select">遍历中</span>
+		<span class="min">当前遍历队列最小</span>
+	</div>
+	<canvas id="canvas" style="background-color: #111;"></canvas>
+</body>
+</html>
+<script type="text/javascript">
+	let canvLeft = 50;
+	let canvTop = 30;
+	let canvas = document.getElementById('canvas');
+	let context = canvas.getContext('2d');
+	let w = window.innerWidth;
+	let h = window.innerHeight;
+	canvas.width = 	w;
+	canvas.height = h;
+	context.fillStyle="#000";
+	w -= canvLeft*2;
+	h -= canvTop + 500;
+	context.fillRect(canvLeft,canvTop,w,h);
+	let columnWidth = 20;
+	let space = 10;
+	let tp = 50;
+	let lt = 60;
+	let baseColor = "#00cc33";
+	let currentColor = "rgb(0,0,255)";
+	let selectColor = "rgb(128,0,255)";
+	let minColor = "rgb(0,255,255)";
+	selectionSort();
+	function getRandomArray(){
+		let array = [];
+		for (var i = 20; i >= 0; i--) {
+			array.push(Math.ceil(Math.random() * 200));
+		}
+		return array;
+	}
+	var current = 0,select = 0,min = 0;
+	function drawBase(length){
+		for (let i = 0; i < length; i++) {
+			context.fillStyle= i == current ? currentColor : i == select ? selectColor : i == min ? minColor : baseColor;
+			context.fillRect(i * (columnWidth + space) + lt,tp,columnWidth,h);
+		}
+	}
+	function draw(array){
+		drawBase(array.length);
+		for (let i = 0; i <array.length; i++) {
+			context.fillStyle="#000";
+			context.fillRect(i * (columnWidth + space) + lt,tp,columnWidth,h - array[i]);
+			context.fillStyle="#fff";
+			context.fillText(array[i],i * (columnWidth + space) + lt,tp + h - array[i] - 1);
+		}
+	}
+	function selectionSort(){
+		let array = getRandomArray();
+		draw(array);
+		let temp;
+		let i = 0,j = 0;
+		let k = i,minNum = array[i];
+		let timmer = setInterval(function(){
+			current = i;
+			select = j;
+			draw(array);
+			if (i < array.length) {
+				if (j < array.length) {
+					current = i;
+					if (minNum > array[j]) {
+						minNum = array[j];
+						k = j;
+						min = k;
+					}else{
+						j++;
+					}
+				} else {
+					temp = array[i];
+					array[i] = minNum;
+					array[k] = temp;
+					j = (i++) + 1; 
+					k = i;
+					min = i;
+					minNum = array[i];
+				}
+			}else{
+				clearInterval(timmer);
+			}
+		},150);
+	}
+	function drawTriangle(x, y,h , type) {
+	    context.beginPath();
+	    context.moveTo(x, y);
+	    context.lineTo(x - h/1.73, y + h);
+	    context.lineTo(x + h/1.73, y + h);
+	    context.fillStyle = baseColor;
+	    context.closePath();
+	    context.fill();
+	}
+</script>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<script src="Functions.js"></script>
+	<script src="Factory.js"></script>
+</head>
+<style>
+	*{
+		margin:0;
+		padding: 0;
+		moz-user-select: -moz-none;
+		-moz-user-select: none;
+		-o-user-select:none;
+		-khtml-user-select:none;
+		-webkit-user-select:none;
+		-ms-user-select:none;
+		user-select:none;
+	}
+	.fight{
+		width:600px;
+		height:500px;
+		margin:0 auto;
+		position: relative;
+		margin-top: 30px;
+	}
+	.msg{
+		margin:0 auto;
+		height: 100%;
+		width:calc(100% - 200px);
+		border:1px solid #ddd;
+		overflow: auto;
+	}
+	.msg span,.total-view span{
+		display: block;
+		font-size:12px;
+		height: 20px;
+		line-height: 20px;
+		margin:0 20px;
+	}
+	.role{
+		position: absolute;
+		display: block;
+		left: 0;
+		top:0;
+		list-style: none;
+		z-index: 10;
+	}
+	.btn{
+		display: block;
+		width: 100px;
+		height: 25px;
+		font-size: 12px;
+		line-height: 25px;
+		border:1px solid #ddd;
+		border-right-width: 0;
+		margin:0 0 10px 0;
+		box-sizing: border-box;
+		text-indent: 10px;
+		border-radius: 3px;
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+		cursor: pointer;
+		font-weight: bolder;
+		color:#D20E0E;
+	}
+	.btn:hover{
+		color: #fff;
+		background-color: #2d78f4;
+	}
+	.btn:active{
+		background-color: #3075dc;
+	}
+	.btn-side{
+		position: absolute;
+		bottom:0;
+		left: 0;
+		text-align: center;
+		text-indent: 0;
+	}
+	.total{
+		bottom:30px;
+	}
+	.total-view{
+		position: fixed;
+		width: 300px;
+		min-height: 300px;
+		box-sizing: border-box;
+		border:1px solid #ddd;
+	    top: 30px;
+	    left: 50%;
+	    margin-left: 200px;
+	}
+</style>
+<body>
+	<div class="fight">
+		<div id="play_msg" class="msg"></div>
+		<ul id="btn_role" class="role">
+			<li class="btn" data-role="Warrior">战士</li>
+			<li class="btn" data-role="Wizard">巫师</li>
+			<li class="btn" data-role="Pastor">牧师</li>
+			<li class="btn" data-role="Bowman">弓箭手</li>
+		</ul>
+		<span class="btn btn-side total" onclick="viewTotal()">角色概况</span>
+		<span class="btn btn-side" onclick="clearMsg();">清除消息</span>
+		<div id="tt_view" class="total-view"></div>
+	</div>
+</body>
+</html>
+<script>
+	var cf = new CommonFunction();
+	var rule =new cf.RuleRange();
+	var player = new Player();
+	var playerList={};
+	let rl = document.getElementById('btn_role').getElementsByTagName('li');
+	for (var i = rl.length - 1; i >= 0; i--) {
+		rl[i].onclick=function(){
+			let role = this.getAttribute('data-role');
+			if (playerList.hasOwnProperty(role)) {
+				playerList[role].fight();
+			}else{
+				let span = document.createElement('span');
+				span.innerHTML= '新建了'+role+'角色';
+				document.getElementById('play_msg').appendChild(span);
+				playerList[role] = player.play(role);
+			}
+			viewTotal();
+		}
+	}
+	function viewTotal(){
+		let content = '';
+		for (var i in playerList) {
+			let p = playerList[i];
+			content += '<span>'+i + ":</span>" ;
+			content += '<span>等级:'+ p.level + "</span>" ;
+			content += '<span>经验:'+ p.curExp + "/"+p.levelExp + "</span>";
+		}
+		document.getElementById('tt_view').innerHTML=content;
+	}
+	function clearMsg(){
+		document.getElementById('play_msg').innerHTML='';
+	}
+</script>

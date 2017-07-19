@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+		*{margin:0;padding: 0}
+		body{overflow: hidden;}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" style="background-color: #111;"></canvas>
+</body>
+</html>
+<script type="text/javascript">
+	let canvLeft = 50;
+	let canvTop = 30;
+	let canvas = document.getElementById('canvas');
+	let context = canvas.getContext('2d');
+	let w = window.innerWidth;
+	let h = window.innerHeight;
+	canvas.width = 	w;
+	canvas.height = h;
+	context.fillStyle="#000";
+	w -= canvLeft*2;
+	h -= canvTop + 500;
+	context.fillRect(canvLeft,canvTop,w,h);
+	let columnWidth = 20;
+	let space = 10;
+	let tp = 50;
+	let lt = 60;
+	bubbleSort();
+	function getRandomArray(){
+		let array = [];
+		for (var i = 20; i >= 0; i--) {
+			array.push(Math.ceil(Math.random() * 200));
+		}
+		return array;
+	}
+	function drawBase(length){
+		for (let i = 0; i < length; i++) {
+			context.fillStyle="#00cc33";
+			context.fillRect(i * (columnWidth + space) + lt,tp,columnWidth,h);
+		}
+	}
+	function draw(array){
+		drawBase(array.length);
+		for (let i = 0; i <array.length; i++) {
+			context.fillStyle="#000";
+			context.fillRect(i * (columnWidth + space) + lt,tp,columnWidth,h - array[i]);
+			context.fillStyle="#fff";
+			context.fillText(array[i],i * (columnWidth + space) + lt,tp + h - array[i] - 1);
+		}
+	}
+	function bubbleSort(){
+		let array = getRandomArray();
+		draw(array);
+		let temp,i = 0,j = 0;
+		let timmer = setInterval(function(){
+			if (i < array.length) {
+				if (j < array.length - 1) {
+					if (array[j] > array[j + 1]) {
+						temp = array[j];
+						array[j] = array[j + 1];
+						array[j + 1] = temp;
+						draw(array);
+					}else{
+						j++;
+					}
+				} else {
+					j = 0; i ++;
+				}
+			}else{
+				clearInterval(timmer);
+			}
+		},30);
+	}
+</script>

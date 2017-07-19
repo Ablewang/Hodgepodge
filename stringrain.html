@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+	*{margin: 0;padding: 0;}
+	body{overflow: hidden;}
+	</style>
+</head>
+<body>
+	<canvas id="root" style="background-color: #111;"></canvas>
+</body>
+</html>
+<script type="text/javascript">
+let canvas = document.getElementById('root');
+let context = canvas.getContext('2d');
+let width = window.innerWidth;
+let height = window.innerHeight;
+canvas.width = width;
+canvas.height=height;
+let fontSize = 16;
+let columns = Math.floor(width/fontSize);
+let color=["#00cc33","#f00"];
+let str = "lovely evy is here";
+let yxis = [];
+for (let i = 0; i < columns; i++) {
+	yxis[i] = 0;
+}
+function draw(){
+	context.fillStyle = "rgba(0,0,0,0.05)";
+	context.fillRect(0,0,width,height);
+	context.font=fontSize + "px 微软雅黑";
+	context.fillStyle=color[0];
+	for (let i = 0; i < columns; i++) {
+		let index = Math.floor(Math.random() * str.length);
+		let x = i * fontSize;
+		let y = yxis[i] * fontSize;
+		context.fillText(str[index],x,y);
+		if (y > height && Math.random() > 0.95) {
+			yxis[i] = 0;
+		}
+		yxis[i]++;
+	}
+}
+setInterval(draw,30);
+</script>

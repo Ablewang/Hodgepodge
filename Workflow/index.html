@@ -1,0 +1,72 @@
+﻿<html>
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="flow-box">
+        <div class="flow-box-top">
+            <ul class="add-title">
+                <li>功&nbsp;能<br />添&nbsp;加</li>
+            </ul>
+            <ul id="addArea" class="add">
+                <li><img src="images/icon-ks.png" class="btn-green" />开始</li>
+                <li><img src="images/icon-cl.png" class="btn-blue" />处理</li>
+                <li><img src="images/icon-tz.png" class="btn-orange" />通知</li>
+                <li><img src="images/icon-js.png" class="btn-red" />结束</li>
+                <li><img src="images/icon-qk.png" class="btn-dark" />区块</li>
+            </ul>
+            <ul class="operation">
+                <li><img src="images/icon-qc.png" class="btn-light-blue" />清除</li>
+                <li><img src="images/icon-hf.png" class="btn-light-blue" />恢复</li>
+            </ul>
+        </div>
+        <div class="flow-box-content">
+            <ul id="uList">
+                <li class="block-ks tag" data-index="1" Relation="2,3" data-type="line">
+                    <i class="icon"></i>
+                    <h3 class="block-title Modify">开始</h3>
+                    <span class="span-shut">×</span>
+                </li>
+                <li class="block-cl tag" data-index="2">
+                    <i class="icon"></i>
+                    <h3 class="block-title Modify">处理</h3>
+                    <span class="span-shut">×</span>
+                </li>
+                <li class="block-tz tag" data-index="3" Relation="4" data-type="line">
+                    <i class="icon"></i>
+                    <h3 class="block-title Modify">通知</h3>
+                    <span class="span-shut">×</span>
+                </li>
+                <div class="block-js tag" data-index="4" Relation="1" data-type="dashed">
+                    <i class="icon"></i>
+                    <h3 class="block-title Modify">结束</h3>
+                    <span class="span-shut">×</span>
+                </li>
+            </ul>
+            
+            <ul>
+                <li class="area tag"><i class="icon"></i><h3 class="area-title Modify">区块一</h3><span class="span-shut">×</span>
+                </li>
+            </ul>
+            
+     
+            <div class="line col arrow-line arrow-right" style="width: 80px; top:10px; left: 10px;"></div>
+            <div class="line col arrow-line arrow-left" style="width: 80px; top:30px; left: 10px;"></div>
+            <div class="line row arrow-line arrow-top" style="height: 60px; top:50px; left: 10px;"></div>
+            <div class="line row arrow-line arrow-bottom" style="height: 60px; top:50px; left: 30px;"></div>
+
+            <div class="dashed col arrow-dashed arrow-right" style="width: 80px; top:210px; left: 10px;"></div>
+            <div class="dashed col arrow-dashed arrow-left" style="width: 80px; top:230px; left: 10px;"></div>
+            <div class="dashed row arrow-dashed arrow-top" style="height: 60px; top:250px; left: 10px;"></div>
+            <div class="dashed row arrow-dashed arrow-bottom" style="height: 60px; top:250px; left: 30px;"></div>
+        </div>
+    </div>
+</body>
+</html>
+<script src="jquery.js"></script>
+<script src="drawline.js"></script>
+<script>
+
+</script>
