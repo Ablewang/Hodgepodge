@@ -6,11 +6,10 @@
 	<style>
 		*{margin:0; padding: 0;}
 		body{text-align: center;}
-		.c-itm,.c-tree{
+		.c-itm,.c-tree,.canv{
 			border:1px solid #5E5E5E;
-			min-width: 300px;
 			margin:0 auto;
-			margin-top: 30px;
+			margin-top: 20px;
 			padding: 0 10px;
 			border-radius: 8px;
 			position: relative;
@@ -19,11 +18,11 @@
 		.c-itm ul{text-align: center;height: 50px;line-height: 50px;}
 		.n-li,.sp-li{
 			display: inline-block;
-			width: 30px;
-			height: 30px;
-			line-height: 30px;
-			border-radius: 30px;
-			font: bolder 14px/30px '微软雅黑';
+			width: 25px;
+			height: 25px;
+			line-height: 25px;
+			border-radius: 25px;
+			font: bolder 12px/25px '微软雅黑';
 			margin:0 5px;
 			cursor: pointer;
 		}
@@ -43,8 +42,15 @@
 		.sp-li:hover{
 			background: #ddd;
 		}
+		.c-tree,.canv{
+			min-height: 500px;
+		}
 		.c-tree{
-			min-height: 600px;
+			position: absolute;
+			top: 72px;
+			left:50%;
+			transform: translate(-50%);
+			z-index: 9999;
 		}
 	</style>
 </head>
@@ -55,23 +61,35 @@
 	</div>
 	<div id="cTree" class="c-tree">
 	</div>
+	<canvas id="canvas" class="canv"></canvas>
 </body>
 </html>
 <script type="text/javascript">
 	let cTree = document.getElementById('cTree');
 	let array = getRandomArray(15,100);
 	let liArray = [];
-	let tree = {};//{index:1,item:obj,left:2,right:3,isRoot:true}
+	let rootNode = null;
+	let tree = {};//{index:1,item:obj,value:2,left:2,right:3,isRoot:true}
+	let canvas =document.getElementById('canvas');
+	canvas.height = cTree.offsetHeight;
+	canvas.width = cTree.offsetWidth;
+	let ctx = canvas.getContext('2d');
+	array=[59,40,95,22,46,67,97,27,79,62,82,3,66,16,13];
 	initLi(array);
 	initTree(liArray);
+
 	function initTree(liarr){
 		let rot = liarr[0];
-		tree[0]=getTreeNode(0,rot,0,0,true);
-		move(rot,(cTree.offsetWidth / 2 - rot.offsetWidth/2) +'px', 'px');
+		tree[0]= rootNode = getTreeNode(0,rot,array[0],true);
+		move(rot,(cTree.offsetWidth / 2 - rot.offsetWidth/2) +'px', '0px');
 		for (let i = 1; i < liarr.length; i++) {
 			let li = liarr[i];
 			setTimeout(()=>{
-				move(li,(cTree.offsetWidth / 2 - li.offsetWidth/2) + i*30 +'px',i * 40 + 'px');
+				let node = getTreeNode(i,li,array[i],false);
+				tree[i] = node;
+				let pos = getPosition(node);
+				console.log(pos);
+				move(li, pos[0] +'px',pos[1]+ 'px');
 			},i * 500)
 		}
 	}
@@ -96,14 +114,42 @@
 		}
 	}
 
-	function getTreeNode(index,liItem,left,right,isRoot){
-		return {index:index,item:liItem,left:left,right:right,isRoot:isRoot};
+	function getTreeNode(index,liItem,value,isRoot){
+		return {index:index,item:liItem,value:value,left:-1,right:-1,isRoot:isRoot};
 	}
 
 	function getPosition(item){
-		for (var i = 0; i < tree.length; i++) {
-			
+		let layer = 0;
+		let parentNode = null;
+		let nextNode = rootNode;
+		let isLeft = true;
+		while(nextNode){
+			layer ++;
+			parentNode = nextNode;
+			if (item.value > parentNode.value) {
+				isLeft = false;
+				nextNode = tree[parentNode.right];
+			}else{
+				isLeft = true;
+				nextNode = tree[parentNode.left];
+			}
 		}
+		let xBase = 1;
+		if (isLeft) {
+			xBase = -1;
+			tree[parentNode.index].left = item.index;
+		}else{
+			tree[parentNode.index].right = item.index;
+		}
+		let offLeft = parentNode.item.offsetLeft;
+		let offTop = parentNode.item.offsetTop;
+		let x = offLeft + xBase * 50 + xBase*(4-layer)*(4-layer)*20;
+		let y = offTop + 70;
+		let offW = parentNode.item.offsetWidth/2,
+			offH = parentNode.item.offsetHeight/2;
+		drawLine(offLeft + offW,offTop + offH,x+offW,y+offH)
+
+		return [x,y];
 	}
 
 	function initLi(arr){
@@ -131,5 +177,12 @@
 			temp[curIdx] = temp[max --];
 		}
 		return res;
+	}
+
+
+	function drawLine(x1,y1,x2,y2){
+		ctx.moveTo(x1,y1);
+		ctx.lineTo(x2,y2);
+		ctx.stroke();
 	}
 </script>
