@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Tree Traversal</title>
+	<style>
+		*{margin:0; padding: 0;}
+		body{text-align: center;}
+		.c-itm,.c-tree,.canv{
+			box-sizing: border-box;
+			border:1px solid #5E5E5E;
+			margin:0 auto;
+			margin-top: 20px;
+			padding: 0 10px;
+			border-radius: 8px;
+			position: relative;
+			width: 90%;
+			max-width: calc(100% - 100px);
+			height: 50px;
+			line-height: 50px;
+		}
+		.c-itm ul{text-align: center;height: 50px;line-height: 50px;}
+		.c-itm > *{display: inline-block;}
+		.c-itm > span{font:normal 20px/50px '微软雅黑' ;color: #888;position: absolute;left: 15px;}
+		.traversal{
+			position: absolute;
+			right:15px;
+		}
+		.traversal span{
+			display: inline-block;
+			height: 20px;
+			line-height: 20px;
+			padding: 5px 10px;
+			border:1px solid #ccc;
+			border-radius: 5px;
+			background: #eee;
+			cursor: pointer;
+		}
+		.traversal span:hover{
+			background: #ccc;
+		}
+		.traversal span:active{
+			background: #fff;
+		}
+
+		.n-li,.sp-li{
+			display: inline-block;
+			width: 25px;
+			height: 25px;
+			line-height: 25px;
+			border-radius: 25px;
+			font: bolder 12px/25px '微软雅黑';
+			margin:0 5px;
+			cursor: pointer;
+		}
+		.n-li{
+			background: #2D77FE;
+			color:#eee;
+		}
+		.n-li:hover{
+			background: #012AC0;
+		}
+		.sp-li{
+		    border: 1px dashed #444;
+		    box-sizing: border-box;
+		    background: #eee;
+		    color: #2D77FE;
+		}
+		.sp-li:hover{
+			background: #ddd;
+		}
+		.canv{
+			height: 80%;
+		}
+		.c-tree{
+			height: 80%;
+			position: absolute;
+			top: 140px;
+			left:50%;
+			transform: translate(-50%);
+			z-index: 9999;
+		}
+	</style>
+</head>
+<body>
+	<div class="c-itm">
+		<span>原始数组</span>
+		<ul id="cUl" >
+		</ul>
+	</div>
+	<div class="c-itm">
+		<span>遍历结果</span>
+		<ul id="travUl"></ul>
+		<div class="traversal">
+			<span onclick="traversal(1);">中序遍历</span>
+			<span onclick="traversal(2);">前序遍历</span>
+			<span onclick="traversal(3);">后序遍历</span>
+		</div>
+	</div>
+	<div id="cTree" class="c-tree">
+	</div>
+	<canvas id="canvas" class="canv"></canvas>
+</body>
+</html>
+<script type="text/javascript">
+	let cTree = document.getElementById('cTree');
+	let array = getRandomArray(15,100);
+	let liArray = [];
+	let rootNode = null;
+	let tree = {};//{index:1,item:obj,value:2,left:2,right:3,isRoot:true}
+	let canvas =document.getElementById('canvas');
+	canvas.height = cTree.offsetHeight;
+	canvas.width = cTree.offsetWidth;
+	let ctx = canvas.getContext('2d');
+	initLi(array);
+	initTree(liArray);
+	
+	//初始化二叉树
+	function initTree(liarr){
+		let rot = liarr[0];
+		tree[0]= rootNode = getTreeNode(0,rot,array[0],true);
+		move(rot,(cTree.offsetWidth / 2 - rot.offsetWidth/2) +'px', '0px');
+		for (let i = 1; i < liarr.length; i++) {
+			let li = liarr[i];
+			let node = getTreeNode(i,li,array[i],false);
+			tree[i] = node;
+			let pos = getPosition(node);
+			console.log(pos);
+			move(li, pos[0] +'px',pos[1]+ 'px');
+		}
+	}
+	
+	//根据位置将节点移动到二叉树具体位置
+	function move(li,left,top){
+		li.style.position = 'absolute';
+		li.style.left = left;
+		li.style.top = top;
+		let space = document.createElement('li');
+		space.setAttribute('class','sp-li');
+		space.innerHTML=li.innerHTML;
+		insertBefore(space,li);
+		cTree.appendChild(li);
+	}
+	
+	//元素节点插入方法
+	function insertBefore(newElm,tagElm){
+		let parent = tagElm.parentNode;
+		if (parent.lastChild == tagElm) {
+			parent.appendChild(newElm);
+		}else{
+			parent.insertBefore(newElm,tagElm.nextSibling);
+		}
+	}
+	
+	//根据信息生成二叉树节点
+	function getTreeNode(index,liItem,value,isRoot){
+		return {index:index,item:liItem,value:value,left:-1,right:-1,isRoot:isRoot};
+	}
+
+	//获取二叉树节点所在位置 返回 [left,top]数组
+	function getPosition(item){
+		let layer = 0;
+		let parentNode = null;
+		let nextNode = rootNode;
+		let isLeft = true;
+		while(nextNode){
+			layer ++;
+			parentNode = nextNode;
+			if (item.value > parentNode.value) {
+				isLeft = false;
+				nextNode = tree[parentNode.right];
+			}else{
+				isLeft = true;
+				nextNode = tree[parentNode.left];
+			}
+		}
+		let xBase = 1;
+		if (isLeft) {
+			xBase = -1;
+			tree[parentNode.index].left = item.index;
+		}else{
+			tree[parentNode.index].right = item.index;
+		}
+		let offLeft = parentNode.item.offsetLeft;
+		let offTop = parentNode.item.offsetTop;
+		let x = offLeft + xBase * 50 + xBase*(4-layer)*(4-layer)*20;
+		let y = offTop + 70;
+		let offW = parentNode.item.offsetWidth/2,
+			offH = parentNode.item.offsetHeight/2;
+		drawLine(offLeft + offW,offTop + offH,x+offW,y+offH)
+
+		return [x,y];
+	}
+
+	//初始化节点li元素
+	function initLi(arr){
+		let conItem = document.getElementById('cUl');
+		conItem.innerHTML = '';
+		for (var i = 0; i < arr.length; i++) {
+			let li = document.createElement('li');
+			li.setAttribute('class','n-li');
+			li.innerHTML = arr[i];
+			liArray.push(li);
+			conItem.appendChild(li);
+		}
+	}
+
+	//获取随机数组
+	function getRandomArray(size,max){
+		let res = [];
+		let temp = [];
+		for (var i = 1; i <= max; i++) {
+			temp.push(i);
+		}
+		--max;
+		for (var i = 0; i < size; i++) {
+			let curIdx = Math.floor(Math.random()*max)
+			res.push(temp[curIdx]);
+			temp[curIdx] = temp[max --];
+		}
+		return res;
+	}
+
+	//根据坐标画线
+	function drawLine(x1,y1,x2,y2){
+		ctx.moveTo(x1,y1);
+		ctx.lineTo(x2,y2);
+		ctx.stroke();
+	}
+
+	let timmer = [];
+	let timeoutIndex = 1;
+	let traContiner = null;
+	//type 遍历方式：1——中序  2——前序  3——后序
+	function traversal(type){
+		initTreeNode();
+		traContiner = document.getElementById('travUl');
+		traContiner.innerHTML = '';
+		switch(type){
+			case 1:midTraversal(rootNode,tree);break;
+			case 2:prevTraversal(rootNode,tree);break;
+			case 3:postTraversal(rootNode,tree);break;
+		}
+	}
+	
+	//中序遍历
+	function midTraversal(tag,tagTree){
+		if (tag) {
+			midTraversal(tagTree[tag.left],tagTree);
+			viewProcess(tag.item);
+			midTraversal(tagTree[tag.right],tagTree);
+		}
+	}
+
+	//前序遍历
+	function prevTraversal(tag,tagTree){
+		if (tag) {
+			viewProcess(tag.item);
+			prevTraversal(tagTree[tag.left],tagTree);
+			prevTraversal(tagTree[tag.right],tagTree);
+		}
+	}
+
+	//后续遍历
+	function postTraversal(tag,tagTree){
+		if (tag) {
+			postTraversal(tagTree[tag.left],tagTree);
+			postTraversal(tagTree[tag.right],tagTree);
+			viewProcess(tag.item);
+		}
+	}
+
+		
+	function initTreeNode(){
+		let tree = cTree.getElementsByClassName('n-li');
+		for (var i = 0; i < tree.length; i++) {
+			tree[i].className = tree[i].className.replace(' sp-li','');
+		}
+		timeoutIndex = 1;
+		timmer.map((itm)=>{
+			clearTimeout(itm);
+		})
+	}
+	function viewProcess(obj){
+		timmer.push(setTimeout(function(){
+			let space = document.createElement('li');
+			space.setAttribute('class','n-li');
+			space.innerHTML=obj.innerHTML;
+			obj.className += ' sp-li';
+			traContiner.appendChild(space);
+		},(timeoutIndex ++) * 250));
+	}
+</script>

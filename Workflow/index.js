@@ -98,6 +98,6 @@ $(function() {
 			type: 'js',
 			offset: ['753px', '183px']
 		}];
-		return data；
+		return data;
 	}
 })
