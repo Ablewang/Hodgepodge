@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style>
+		*{margin: 0;padding: 0; -webkit-user-select:none; outline: none;font:normal 12px '微软雅黑';}
+		.content{font-size: 18px;font-weight: bolder;}
+		.title{display: inline-block;position: absolute;left: 10px; top:5px;}
+		.title span{margin-right: 25px;vertical-align: middle;position: relative;}
+		.intr::before{content: '';position: absolute;width: 12px;height: 12px;background: #ddd;top: 50%;left: -15px;transform: translate(0,-50%);}
+		.span-btn li{border:1px solid #787878; border-radius: 3px;margin:5px 0;padding: 5px;cursor: pointer;}
+		.span-btn li:hover{background: #ddd;}
+		.span-btn li:active{background: #fff;}
+
+		/*快排 --start--*/
+		.title-qsort{top:235px;}
+		.continer{
+			border:1px dashed #ccc;
+			background: #eee;
+			border-radius: 8px;
+			margin:30px 10px;
+			position: relative;
+		}
+		.intr-base::before{background: #00f;}
+		.intr-sentry::before{background: #f00;}
+		.intr-sort-area::before{background:  rgba(244,90,0,.5);}
+		.c-qsort{
+			height: 170px;
+		}
+		#qsort{text-align: center;position: absolute;bottom: 0;right:8px;z-index: 8888;}
+		li{list-style: none;}
+		#qsort li{
+			display: inline-block;
+			width: 25px;
+			height: 30px;
+			background: #888;
+			color: #fff;
+			margin:0 5px 3px;
+			vertical-align: bottom;
+		}
+		.baseColor{background: #00f !important;}
+		.sentryColor{background: #f00 !important;}
+		.sortAreaColor{background: #FF8202 !important;}
+		.curLoopColor{border:2px solid rgb(128,0,255) !important;}
+		.c-base{border-top:2px solid #f00; width: calc(100% - 16px);display: inline-block;position: absolute; left: 8px;bottom: 3px;z-index: 9999;box-sizing: border-box;}
+		#qsBase{width: 25px;background: #00f;color:#fff;text-align: center;}
+		#shade{background: rgba(244,90,0,.5);width: 100px;height: 100%;position: absolute;position: 7777;}
+		/*快排 --end--*/
+
+		/*队列 --start--*/
+		.c-queue{
+			height: 200px;
+			text-align: center;
+		}
+		#queue{
+			margin-top:75px;
+			height: 50px;
+			min-width:200px;
+		    display: inline-block;
+		    line-height: 50px;
+		    border:2px solid #ccc;
+		    border-left-style: dashed;;
+		    border-right-style: dashed;
+		}
+		#queue li,#stack li{
+			display: inline-block;
+			margin:0 5px;
+			width: 30px;
+			height: 30px;
+			line-height: 30px;
+			border-radius: 2px;
+			background: #00f;
+			color:#fff;
+		}
+		.queue-btn{position: absolute;left: 8px;top: 8px;}
+
+		.c-queuedata{height: 54px;line-height:54px;min-width: 150px;display: inline-block;position: absolute;border:1px dashed #888;}
+		.c-queuedata li,.c-stackdata li{
+			display: inline-block;
+			margin:0 5px;
+			width: 30px;
+			height: 30px;
+			line-height: 30px;
+			border-radius: 2px;
+			color:#fff;
+		}
+		#uninQ{left:150px;top:8px;}
+		#uninQ li,#uninS li{background: #f00;}
+		#outQ{right: 8px;bottom: 8px;}
+		#outQ li,#outS li{background: rgba(244,90,0,.5);}
+		/*队列 --end--*/
+
+		/*栈 --start--*/
+		.c-stack{
+			width: 300px;
+			position: relative;
+			display: inline-block;
+		}
+		.stack-btn{text-align: center;}
+		.stack-btn li{margin:5px;display: inline-block;}
+		.c-dataUl{
+			position: relative;
+			margin:20px 8px 8px;
+		}
+		.c-stackdata{
+			width: 50px;
+			min-height: 150px;
+			border:1px dashed #888;
+			display: inline-block;
+    		margin: 0 20px;
+    		vertical-align: bottom;
+		}
+		#uninS,#outS{min-height: 800px;text-align: center;}
+		#stack{border-left-style: solid;border-bottom-style: solid;border-right-style: solid;text-align: center;min-height: 50px;}
+		.c-stackdata li{margin:0 auto !important; margin-top:5px !important; margin-bottom: 5px !important; }
+		/*栈 --end--*/
+		.c-huffman,.c-stack{margin-top:0;    vertical-align: top;}
+		.title-stack,.title-huffman{top:435px;}
+		/*哈夫曼 --start--*/
+		.c-huffman{
+			height: 871px;
+			width: calc(100% - 348px);
+			display: inline-block;
+		}
+		.title-huffman{left:336px;}
+		.c-huffmanTree{
+			width: 100%;
+			height: calc(100% - 40px);
+		}
+		.c-huffmanTree li{
+			width: 30px;
+			height: 30px;
+			line-height: 30px;
+			border-radius: 2px;
+			background: #00f;
+			color:#fff;
+			text-align: center;
+    		position: absolute;
+		}
+		.add-node{background: rgb(128,0,255) !important;}
+		/*哈夫曼 --end--*/
+
+	</style>
+</head>
+<body>
+	<div class="title">
+		<span class="content">队列操作</span>
+		<span class="intr intr-base">队列</span>
+		<span class="intr intr-sentry">出队数据</span>
+		<span class="intr intr-sort-area">待入队数据</span>
+	</div>
+
+	<div class="continer c-queue">
+		<ul class="span-btn queue-btn">
+			<li onclick="clearQueue();">清空队列</li>
+			<li onclick="createQueueData();">重新生成待入队数组</li>
+			<li onclick="push();">入队</li>
+			<li onclick="pop();">出队</li>
+		</ul>
+		<ul id="uninQ" class="c-queuedata">
+		</ul>
+		<ul id="queue">
+		</ul>
+		<ul id="outQ" class="c-queuedata">
+		</ul>
+	</div>
+
+	<div class="title  title-qsort">
+		<span class="content">快速排序</span>
+		<span class="intr intr-base">基准元素</span>
+		<span class="intr intr-sentry">哨兵</span>
+		<span class="intr intr-sort-area">排序区域</span>
+	</div>	<div class="continer c-qsort">
+		<div id="shade"></div>
+		<div class="c-base">
+			<div id="qsBase"></div>
+		</div>
+		<ul id="qsort">
+			<li>12</li>
+			<li>12</li>
+		</ul>
+	</div>
+
+	<div class="title title-stack">
+		<span class="content">栈操作</span>
+		<span class="intr intr-base">当前栈</span>
+		<span class="intr intr-sentry">出栈数据</span>
+		<span class="intr intr-sort-area">待入栈数据</span>
+	</div>
+
+	<div class="continer c-stack">
+		<ul class="span-btn stack-btn">
+			<li onclick="clearStack();">清空栈</li>
+			<li onclick="createStackData();">生成待入栈数组</li>
+			<li onclick="stackPush();">入栈</li>
+			<li onclick="stackPop();">出栈</li>
+		</ul>
+		<div class="c-dataUl">
+			<ul id="uninS" class="c-stackdata">
+			</ul>
+			<ul id="stack" class="c-stackdata">
+			</ul>
+			<ul id="outS" class="c-stackdata">
+			</ul>
+		</div>
+	</div>
+
+	<div class="title title-huffman">
+		<span class="content">哈夫曼树</span>
+		<span class="intr intr-base">当前数据</span>
+		<span class="intr intr-sentry">出栈数据</span>
+		<span class="intr intr-sort-area">待入栈数据</span>
+	</div>
+
+	<div class="continer c-huffman">
+		<ul class="span-btn stack-btn">
+			<li onclick="createHuffmanData();">生成序列并排序</li>
+			<li onclick="createHuffmanTree();">开始成长哈夫曼输</li>
+		</ul>
+		<ul class="c-huffmanTree" id="huffmanTree">
+			
+		</ul>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	let qsortContiner = document.getElementById('qsort');
+	let qsortBase = document.getElementById('qsBase');
+	let arrayLi = {};
+	let array = [];
+
+	var timeIdx = 1;
+	var timmer = [];
+	let timmerBase = 50;
+	array = getRandomArray(20,100,20);
+	initQsortUI(array);
+	executeQuickSort();
+
+	function executeQuickSort(){
+		timmer.map((itm)=>{
+			clearTimeout(itm);
+		});
+		qSort(array,0,array.length - 1);
+	}
+	function initQsortUI(arr){
+		qsortContiner.innerHTML = '';
+		arr.map((itm,idx)=>{
+			let li = document.createElement('li');
+			li.innerHTML = itm;
+			li.style.height = itm + 'px';
+			arrayLi[itm] = li;
+			qsortContiner.appendChild(li);
+		})
+	}
+	function getRandomArray(len,max,base){
+		let lst = [];
+		let res = [];
+		for (var i = 0; i < max; i++) {
+			lst.push(base + i);
+		}
+		--max;
+		for (var i = 0; i < len; i++) {
+			let idx = Math.floor(Math.random()*max);
+			res.push(lst[idx]);
+			lst[idx] = lst[max --];
+		}
+		return res;
+	}
+
+	function qSort(arr,left,right){
+		setTime(setShade,[left,right]);
+		let l = left,r = right,temp = 0;
+		let swap = 0;
+		if (l <= r) {
+			temp = arr[l];
+			setTime(setBaseInfo,[temp]);
+			while(l != r){
+				while(r > l && arr[r] >= temp){
+					setTime(setSentryStyle,[arrayLi[arr[r]],arrayLi[arr[r+1]]]);
+					r--;
+				}
+				setTime(setSentryStyle,[arrayLi[arr[r]],arrayLi[arr[r + 1]]]);
+				setTime(exchange,[arrayLi[arr[l]],arrayLi[arr[r]]]);
+				swap = arr[l];arr[l] = arr[r];arr[r] = swap;
+				while(l < r && arr[l] < temp){
+					setTime(setSentryStyle,[arrayLi[arr[l]],arrayLi[arr[l - 1]]]);
+					l ++;
+				}
+				setTime(setSentryStyle,[arrayLi[arr[l]],arrayLi[arr[l - 1]]]);
+				setTime(exchange,[arrayLi[arr[l]],arrayLi[arr[r]]]);
+				swap = arr[l];arr[l] = arr[r];arr[r] = swap;
+			}
+	
+			qSort(arr,left,l - 1);
+			qSort(arr,r + 1,right);
+		}
+	}
+
+	function setTime(fun,args){
+		timmer.push(setTimeout(()=>{
+			fun(args);
+		},timmerBase * (timeIdx ++)));
+	}
+	
+	function setShade(arg){
+		let begin = arg[0],num = arg[1] - begin  + 1;
+		let children = qsortContiner.children;
+		let shade = document.getElementById('shade');
+		shade.style.left = qsortContiner.offsetLeft + children[begin].offsetLeft - 5 +'px';
+		shade.style.width = num * 35 + 'px';
+	}
+
+	function exchange(arg){
+		let liA = arg[0],liB = arg[1];
+		if (liA.nextSibling == liB) {
+			qsortContiner.insertBefore(liB,liA);
+		}else if (liA.previousSibling == liB) {
+			qsortContiner.insertBefore(liA,liB);
+		}else{
+			if (liA.nextSibling) {
+				let aNext = liA.nextSibling;
+				qsortContiner.insertBefore(liA,liB);
+				qsortContiner.insertBefore(liB,aNext);
+			}else{
+				let bNext = liB.nextSibling;
+				qsortContiner.insertBefore(liB,liA);
+				qsortContiner.insertBefore(liA,bNext);
+			}
+		}
+	}
+
+	function setBaseInfo(arg){
+		let item = arg[0];
+		qsortBase.style.height = item + 'px';
+		qsortBase.innerHTML = item;
+		clearLiClass(' baseColor');
+		arrayLi[item].className = (arrayLi[item].className || '') +' baseColor';
+	}
+
+	function setSentryStyle(arg){
+		let li = arg[0];
+		let prev = arg[1];
+		clearLiClass(' sentryColor');
+		!li ? '' : (li.className = (li.className || '') +' sentryColor');
+	}
+
+	function clearLiClass(className){
+		let children = qsortContiner.children;
+		for (var i = 0; i < children.length; i++) {
+			children[i].className = children[i].className.replace(className,'')
+		}
+	}
+
+	let uninQ = document.getElementById('uninQ');
+	let queue = document.getElementById('queue');
+	let outQ = document.getElementById('outQ');
+	function createQueueData(){
+		uninQ.innerHTML='';
+		let arr = getRandomArray(20,100,1);
+		arr.map((itm)=>{
+			let li = document.createElement('li');
+			li.innerHTML = itm;
+			uninQ.appendChild(li);
+		})
+	}
+
+	function clearQueue(){
+		queue.innerHTML='';
+	}
+
+	function push(){
+		let itm = uninQ.lastChild;
+		if (itm) {
+			let first = queue.firstChild;
+			!first ? queue.appendChild(itm) : queue.insertBefore(itm,first);
+		}
+	}
+	
+	function pop(){
+		let itm = queue.lastChild;
+		if (itm) {
+			outQ.appendChild(itm);
+		}
+	}
+
+	let uninS = document.getElementById('uninS');
+	let stack = document.getElementById('stack');
+	let outS = document.getElementById('outS');
+	function createStackData(){
+		uninS.innerHTML='';
+		let arr = getRandomArray(20,100,1);
+		initStackDataLi(arr);
+	}
+
+	function initStackDataLi(arr){
+		arr.map((itm)=>{
+			let li = document.createElement('li');
+			li.innerHTML = itm;
+			uninS.appendChild(li);
+		})
+	}
+
+	function clearStack(){
+		stack.innerHTML='';
+	}
+
+	function stackPush(){
+		let itm = uninS.firstChild;
+		if (itm) {
+			let first = stack.firstChild;
+			!first ? stack.appendChild(itm) : stack.insertBefore(itm,first);
+		}
+	}
+	
+	function stackPop(){
+		let itm = stack.firstChild;
+		if (itm) {
+			outS.appendChild(itm);
+		}
+	}
+
+	let huffmanTree = document.getElementById('huffmanTree');
+	let tree = {};
+	let treeNodes = {};
+	let idx = 0;
+
+	function createHuffmanData(){
+		huffmanTree.innerHTML = '';
+		timmerBase = 0;
+		array = getRandomArray(8,40,1);
+		initQsortUI(array);
+		executeQuickSort();
+		initStackDataLi(array.reverse());
+		clearStack();
+		for (var i = 0; i <= array.length; i++) {
+			stackPush();
+		}
+	}
+
+	function createHuffmanTree(){
+		let children = stack.children;
+		while(children.length > 0){
+			let right = children[0],left = children[1];
+			createTreeNode(right,idx);
+			huffmanTree.appendChild(right);
+			if (left) {
+				huffmanTree.appendChild(left);
+				let num = parseInt(right.innerHTML) + parseInt(left.innerHTML);
+				createNewNode(num,children,idx);
+				createTreeNode(left,idx);
+			}
+			idx ++;
+		}
+		console.log(treeNodes)
+		let rootNode = treeNodes[idx - 1];
+		rootNode.data[0].style.left = huffmanTree.offsetWidth / 2 - rootNode.data[0].offsetWidth/2 + 'px';
+		rootNode.data[0].style.top = '5px';
+		drawTree(rootNode);
+	}
+	function createTreeNode(node,index){
+		!treeNodes[index] ? (treeNodes[index] = {data:[]}) : '';
+		!treeNodes[index].data.push?(treeNodes[index].data = [nodex]) : treeNodes[index].data.push(node);
+		if (isAdded(node)) {
+			treeNodes[index].children = parseInt(node.getAttribute('data-child'));
+		}
+	}
+
+	function drawTree(node){
+		if(node){
+			let children = treeNodes[node.children].data;
+			if (children[0]) {
+				children[0].style.left = node.offsetLeft - 40 + 'px';
+				children[0].style.top = node.offsetTop + 40 + 'px';
+				drawTree(node.left);
+			}
+			if (children[1]) {
+				children[1].style.left = node.offsetLeft + 40 + 'px';
+				children[1].style.top = node.offsetTop + 40 + 'px';
+				drawTree(node.right);
+			}
+		}
+	}
+
+	function isAdded(node){
+		return node.className.indexOf('add-node') >= 0;
+	}
+
+	function createNewNode(num,lis,childIndex){
+		let li = document.createElement('li');
+		li.innerHTML = num;
+		li.setAttribute('class','add-node');
+		li.setAttribute('data-child',childIndex);
+		while(lis.length > 0){
+			let curNum = parseInt(lis[0].innerHTML);
+			if (num < curNum) {
+				break;
+			}else{
+				stackPop();
+			}
+		}
+		let first = stack.firstChild;
+		!first ? stack.appendChild(itm) : stack.insertBefore(li,first);
+		let poped = outS.children;
+		for (var i = poped.length - 1; i >= 0; i--) {
+			let first = stack.firstChild;
+			!first ? stack.appendChild(itm) : stack.insertBefore(poped[i],first);
+		}
+	}
+
+
+</script>
