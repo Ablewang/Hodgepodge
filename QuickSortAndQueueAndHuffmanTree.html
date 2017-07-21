@@ -111,7 +111,7 @@
     		margin: 0 20px;
     		vertical-align: bottom;
 		}
-		#uninS,#outS{min-height: 800px;text-align: center;}
+		#uninS,#outS{min-height: 500px;text-align: center;}
 		#stack{border-left-style: solid;border-bottom-style: solid;border-right-style: solid;text-align: center;min-height: 50px;}
 		.c-stackdata li{margin:0 auto !important; margin-top:5px !important; margin-bottom: 5px !important; }
 		/*栈 --end--*/
@@ -119,15 +119,19 @@
 		.title-stack,.title-huffman{top:435px;}
 		/*哈夫曼 --start--*/
 		.c-huffman{
-			height: 871px;
+			height: 571px;
 			width: calc(100% - 348px);
 			display: inline-block;
 		}
 		.title-huffman{left:336px;}
-		.c-huffmanTree{
+		.c-huffmanTree,#canvas{
 			width: 100%;
 			height: calc(100% - 40px);
+			position: absolute;
+			z-index: 9999;
 		}
+		.t-show{z-index: 10001;}
+		#canvas{z-index: 10000;}
 		.c-huffmanTree li{
 			width: 30px;
 			height: 30px;
@@ -219,8 +223,10 @@
 			<li onclick="createHuffmanTree();">开始成长哈夫曼输</li>
 		</ul>
 		<ul class="c-huffmanTree" id="huffmanTree">
-			
 		</ul>
+		<ul class="c-huffmanTree t-show" id="shwHuffmanTree">
+		</ul>
+		<canvas id="canvas"></canvas>
 	</div>
 </body>
 </html>
@@ -421,13 +427,39 @@
 	}
 
 	let huffmanTree = document.getElementById('huffmanTree');
+	let shwHuffmanTree = document.getElementById('shwHuffmanTree');
+	let canvas = document.getElementById('canvas');
+	canvas.width = shwHuffmanTree.offsetWidth;
+	canvas.height = shwHuffmanTree.offsetHeight;
+	let ctx = canvas.getContext('2d');
+
 	let tree = {};
-	let treeNodes = {};
+	let treeNodes = {}; // index  parent  left right
+	let treeNodesParent = {}; // index  parent  left right
+	let nodeIdx = 0;
 	let idx = 0;
+	let positionNode = {};
+	let treeTime= [];
+	let treeTimeIndex = 0;
+	let treeTimeBase = 300;
 
 	function createHuffmanData(){
 		huffmanTree.innerHTML = '';
+		huffmanTree.hidden =false;
+		shwHuffmanTree.innerHTML = '';
+		nodeIdx = idx = 0;
 		timmerBase = 0;
+		tree = {};
+		treeNodes = {}; // index  parent  left right
+		treeNodesParent = {}; // index  parent  left right
+		positionNode = {};
+		treeTime.map((itm)=>{
+			clearTimeout(itm);
+		});
+		treeTimeIndex = 0;
+
+		clearCanvas();
+
 		array = getRandomArray(8,40,1);
 		initQsortUI(array);
 		executeQuickSort();
@@ -442,42 +474,124 @@
 		let children = stack.children;
 		while(children.length > 0){
 			let right = children[0],left = children[1];
-			createTreeNode(right,idx);
+			createTreeNode(right,idx,nodeIdx++);
 			huffmanTree.appendChild(right);
 			if (left) {
 				huffmanTree.appendChild(left);
 				let num = parseInt(right.innerHTML) + parseInt(left.innerHTML);
 				createNewNode(num,children,idx);
-				createTreeNode(left,idx);
+				createTreeNode(left,idx,nodeIdx++);
 			}
 			idx ++;
 		}
 		console.log(treeNodes)
-		let rootNode = treeNodes[idx - 1];
-		rootNode.data[0].style.left = huffmanTree.offsetWidth / 2 - rootNode.data[0].offsetWidth/2 + 'px';
-		rootNode.data[0].style.top = '5px';
-		drawTree(rootNode);
-	}
-	function createTreeNode(node,index){
-		!treeNodes[index] ? (treeNodes[index] = {data:[]}) : '';
-		!treeNodes[index].data.push?(treeNodes[index].data = [nodex]) : treeNodes[index].data.push(node);
-		if (isAdded(node)) {
-			treeNodes[index].children = parseInt(node.getAttribute('data-child'));
-		}
+		console.log(treeNodesParent)
+		let rootNode = treeNodes[nodeIdx - 1];
+		rootNode.node.style.left = huffmanTree.offsetWidth / 2 - rootNode.node.offsetWidth/2 + 'px';
+		rootNode.node.style.top = '40px';
+		drawTree(rootNode,0);
+		let position = [];
+		Object.keys(positionNode).map((itm)=>{position.push(parseInt(itm));})
+		huffmanTree.hidden =true;
+		showHuffman(position);
 	}
 
-	function drawTree(node){
-		if(node){
-			let children = treeNodes[node.children].data;
-			if (children[0]) {
-				children[0].style.left = node.offsetLeft - 40 + 'px';
-				children[0].style.top = node.offsetTop + 40 + 'px';
-				drawTree(node.left);
+	function showHuffman(position){
+		position.sort((a,b)=>{return b - a;})
+		console.log(position);
+		position.map((itm)=>{
+			let nodes = positionNode[itm];
+			let showParent = 0;
+			nodes.map((n)=>{
+				showParent ++;
+				treeTime.push(setTimeout(function(){
+					shwHuffmanTree.appendChild(n.node);
+				},(treeTimeIndex ++) * treeTimeBase));
+				showParent %= 2;
+				if (!showParent) {
+					treeTime.push(setTimeout(function(){
+						let par = n.parent;
+						shwHuffmanTree.appendChild(par.node);
+						let lf = treeNodes[par.left].node;
+						let rt =  treeNodes[par.right].node;
+						let parPoint = [par.node.offsetLeft + par.node.offsetWidth/2,
+						par.node.offsetTop  + par.node.offsetHeight/2];
+
+						let leftPoint = [lf.offsetLeft + lf.offsetWidth/2,
+						lf.offsetTop  + lf.offsetHeight/2]; 
+
+						let rightPoint = [rt.offsetLeft + rt.offsetWidth/2,
+						rt.offsetTop  + rt.offsetHeight/2]; 
+
+						drawLine(leftPoint[0],leftPoint[1],parPoint[0],parPoint[1]);
+						drawLine(rightPoint[0],rightPoint[1],parPoint[0],parPoint[1]);
+					},(treeTimeIndex ++) * treeTimeBase));
+				}
+			})
+		})
+	}
+
+	function drawLine(x1,y1,x2,y2){
+		ctx.moveTo(x1,y1);
+		ctx.lineTo(x2,y2);
+		ctx.stroke();
+	}
+	function clearCanvas()  
+	{  
+	    ctx.fillStyle="#eee";  
+	    ctx.beginPath();  
+	    ctx.fillRect(0,0,canvas.width,canvas.height);  
+	    ctx.closePath();  
+	}  
+	function createTreeNode(node,index,nIndex){
+		if (!treeNodes[nIndex]) {
+			treeNodes[nIndex] = {
+				index:nIndex,
+				node:node
 			}
-			if (children[1]) {
-				children[1].style.left = node.offsetLeft + 40 + 'px';
-				children[1].style.top = node.offsetTop + 40 + 'px';
-				drawTree(node.right);
+		}
+		if (!treeNodesParent[index]) {
+			treeNodesParent[index] = [nIndex]
+		}else{
+			treeNodesParent[index].push(nIndex);
+		}
+		if (isAdded(node)) {
+			let cIdx =  parseInt(node.getAttribute('data-child'));
+			treeNodes[nIndex].left = treeNodesParent[cIdx][0];
+			treeNodes[nIndex].right = treeNodesParent[cIdx][1];
+		}
+	}
+	let space ={
+		0:250,
+		1:125,
+		2:62.5,
+		3:31.25,
+		4:15.625,
+		5:7.8125,
+		5:3.9,
+		6:1.95,
+		6:1
+	}
+	function drawTree(node,layer){
+		if(node){
+			let left = treeNodes[node.left];
+			if (left) {
+				let h = node.node.offsetTop + 60 ;
+				left.node.style.left = node.node.offsetLeft  - space[layer]+ 'px';
+				left.node.style.top = h + 'px';
+				left.parent = node;
+				!positionNode[h] ? (positionNode[h] = [left]) : positionNode[h].push(left);
+				console.log(left)
+				drawTree(left,layer + 1);
+			}
+			let right = treeNodes[node.right];
+			if (right) {
+				let h = node.node.offsetTop + 60 ;
+				right.node.style.left = node.node.offsetLeft + space[layer]+ 'px';
+				right.node.style.top = node.node.offsetTop + 60 + 'px';
+				right.parent = node;
+				!positionNode[h] ? (positionNode[h] = [right]) : positionNode[h].push(right);
+				drawTree(right,layer + 1);
 			}
 		}
 	}
@@ -500,11 +614,11 @@
 			}
 		}
 		let first = stack.firstChild;
-		!first ? stack.appendChild(itm) : stack.insertBefore(li,first);
+		!first ? stack.appendChild(li) : stack.insertBefore(li,first);
 		let poped = outS.children;
 		for (var i = poped.length - 1; i >= 0; i--) {
 			let first = stack.firstChild;
-			!first ? stack.appendChild(itm) : stack.insertBefore(poped[i],first);
+			!first ? stack.appendChild(poped[i]) : stack.insertBefore(poped[i],first);
 		}
 	}
 
