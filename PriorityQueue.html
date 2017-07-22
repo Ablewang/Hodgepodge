@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>优先队列</title>
+	<style>
+		*{margin:0; padding: 0;font:normal 13px '微软雅黑';-webkit-user-select:none;}
+		html,body{height: calc(100% - 1px);width: 100%;border-top:1px solid #fff;}
+		.continer{
+			margin:10px 15px 0;
+			min-height: 50px;
+			border:1px dashed #888;
+			box-sizing: border-box;
+			position: relative;
+		}
+		li,#queue > span{
+			display: inline-block;
+			list-style: none;
+			width: 30px;
+			height: 30px;
+			line-height: 30px;
+			border:1px solid #ddd;
+			text-align: center;
+			border-radius: 5px;
+			color: #fff;
+			background-color: rgba(128,0,255,.8);
+			margin:0 5px;
+			cursor: pointer;
+		}
+		li:hover{background-color: rgba(128,0,255,.9);}
+		li:active{background-color: rgba(128,0,255,.5);}
+		#orgArr{height: 50px;line-height: 50px;text-align: center;}
+		
+		.c-queue{width:calc(100% - 30px); min-height: calc(100% - 80px);position: absolute;z-index: 9999;}
+		#queue{z-index: 10001;}
+		#queue > span{position: absolute;margin:0;background-color: rgb(128,0,255);}
+		#canvas{border:none;}
+
+		.new-Itm {background-color: rgb(255,0,0) !important;}
+		.added-Itm {background-color: rgb(0,0,0) !important;}
+		.intru{
+			position: absolute;
+			top:80px;
+			left:30px;
+		}
+		.intru .node{position:relative;display: inline-block;height: 20px;line-height: 20px;margin-left:25px;
+		}
+		.intru .node::before{
+			content:'';
+			position: absolute;
+			height: 15px;
+			width:15px;
+			background-color: rgb(128,0,255);
+			top:2px;
+			left:-18px;
+		}
+		.intru .new::before{background-color: rgb(255,0,0);}
+		.intru .added::before{background-color: rgb(0,0,0);}
+	</style>
+</head>
+<body>
+<div class="continer">
+	<ul id="orgArr"></ul>
+</div>
+<div class="intru">
+	<span class="node">普通节点</span>
+	<span class="node new">正在插入节点</span>
+	<span class="node added">已插入节点</span>
+</div>
+<div class="continer c-queue" id="queue">
+</div>
+<canvas class="continer c-queue" id="canvas"></canvas>
+</body>
+</html>
+<script type="text/javascript">
+	let orgUl = document.getElementById('orgArr');
+	let queueTree = document.getElementById('queue');
+	let nodeArray = [];
+	let randomArray = getRandomArray(20,100,10);
+	let orgNode = {};
+	let treeNode = {};
+	let timmer = [];
+	let timeIdx = 0;
+	let timeBase = 400;
+	let canvas = document.getElementById('canvas');
+	canvas.height = queueTree.offsetHeight;
+	canvas.width = queueTree.offsetWidth;
+	let ctx = canvas.getContext('2d');
+
+	let space ={
+		2:250,
+		3:125,
+		4:62.5,
+		5:31.25,
+		6:15.625,
+		7:7.8125
+	}
+	let treeLayerNum ={};
+	console.log(randomArray);
+	drawOrginLi(randomArray);
+	initQueue(randomArray);
+
+	function drawOrginLi(arr){
+		orgUl.innerHTML = '';
+		arr.map((itm)=>{
+			let li = document.createElement('li');
+			li.innerHTML = itm;
+			orgNode[itm] = li;
+			orgUl.appendChild(li);	
+		})
+	}
+
+	function initQueue(arr){
+		queueTree.innerHTML = '';
+		arr.map((itm)=>{
+			addNode(itm);
+		})
+	}
+
+	function addNode(data){
+		setTimeout(()=>{
+			orgNode[data].className = 'new-Itm';
+		},timeBase * (timeIdx))
+		nodeArray.push(data);
+		let idx = nodeArray.length - 1;
+		reposition(data,idx);
+	}
+
+	function reposition(data,idx){
+		let par = Math.floor((idx - 1)/2);
+		setTimeout(((d,i,p)=>{
+			return ()=>{
+				let node = createNode(d,getLayer(i),treeNode[p]);
+				queueTree.appendChild(node);
+				if (treeNode[p]) {
+					drawLine(treeNode[p].offsetLeft + treeNode[p].offsetWidth / 2,treeNode[p].offsetTop + treeNode[p].offsetHeight / 2,node.offsetLeft + node.offsetWidth / 2,node.offsetTop + node.offsetHeight / 2);
+				}
+			}
+		})(data,idx,nodeArray[par]),timeBase * (timeIdx ++));
+
+		while (nodeArray[par] && nodeArray[par] > data) {
+			let temp = data;
+
+			setTimeout(((i,p)=>{
+				return function(){
+					swap(treeNode[i],treeNode[p]);
+				}
+			})(nodeArray[idx],nodeArray[par]),timeBase * (timeIdx ++));
+
+			nodeArray[idx] = nodeArray[par];
+			nodeArray[par] = data;
+			idx = par;
+			par = Math.floor((idx - 1)/2);
+		}
+		setTimeout(()=>{
+			clearClassName('new-Itm');
+		},timeBase * (timeIdx ++))
+	}
+
+	function createNode(data,layer,parent){
+		!treeLayerNum[layer] ? (treeLayerNum[layer] = 1) : (treeLayerNum[layer] ++);
+		let base = (treeLayerNum[layer] % 2 ? -1 : 1);
+		let sp = (space[layer] || 0) * base;
+		let span = document.createElement('span');
+		span.innerHTML = data;
+		let left = (!parent ? queueTree.offsetWidth/2 : (parent.offsetLeft + sp + 15));
+		let top = (!parent ? 30 : parent.offsetTop + 50 + 15);
+		span.style.left = left -15 + 'px';
+		span.style.top = top + 'px';
+		span.className = 'new-Itm';
+		treeNode[data] = span;
+		return span;
+	}
+
+	function swap(nodeA,nodeB){
+		let lA = nodeA.style.left;
+		let tA = nodeA.style.top;
+		nodeA.style.left = nodeB.style.left;
+		nodeA.style.top = nodeB.style.top;
+
+		nodeB.style.left = lA;
+		nodeB.style.top = tA;
+	}
+
+	function clearClassName(cls){
+		for (var i in treeNode) {
+			treeNode[i].className = treeNode[i].className.replace(cls,'');
+		}
+		setAddedSign();
+	}
+
+	function setAddedSign(){
+		for (var i in orgNode) {
+			if (orgNode[i].className.indexOf('new-Itm') >= 0) {
+				orgNode[i].className = 'added-Itm';
+			}
+		}
+	}
+
+	function getLayer(idx){
+		idx ++;
+		let layer = 0;
+		while(idx > (Math.pow(2,layer) - 1))layer ++;
+		return layer;
+	}
+
+	function drawLine(x1,y1,x2,y2){
+		ctx.moveTo(x1,y1);
+		ctx.lineTo(x2,y2);
+		ctx.stroke();
+	}
+
+	function getRandomArray(len,max,min){
+		let temp = [];
+		let res = [];
+		for (var i = 1; i <=max; i++) {
+			temp.push(i + (min || 0));
+		}
+		max --;
+		while(res.length < len){
+			let idx = Math.floor(Math.random() * max);
+			res.push(temp[idx]);
+			temp[idx] = temp[max --];
+		}
+		return res;
+	}
+</script>

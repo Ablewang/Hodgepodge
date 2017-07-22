@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style>
+		*{margin: 0; padding: 0;-webkit-user-select:none;}
+		html,body{height: calc(100% - 1px);border-top:1px solid #fff;}
+		.continer{height: 50px;border:1px dashed #888;margin: 10px 10px 0;position: relative;
+		}
+		.action{line-height: 50px;text-align: center;}
+		.action span{
+			display: inline-block;
+			height: 20px;
+			line-height: 20px;
+			padding: 0 10px;
+			border: 1px solid #444;
+			border-radius: 4px;
+			cursor: pointer;
+			font:normal 13px '微软雅黑';
+		}
+		.action span:hover{background-color: #ddd;}
+		.action span:active{background-color: #eee;}
+		.c-map{height: calc(100% - 80px);text-align: center;}
+		.u-map{
+			display: inline-block;
+			border:1px solid #888;
+			margin-top: 10px;
+			padding: 5px;
+			font-size: 0;
+		}
+		.u-map li{
+			list-style-type: none;
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			cursor: pointer;
+			border-style: solid;
+			border-color:#444;
+			border-width:0 1px 1px 0;
+			font-size: 12px;
+		}
+		.u-map li:active{background-color: #ccc;}
+		.u-map ul:first-child li{
+			border-top-width:1px;
+		}
+		.u-map ul li:first-child{
+			border-left-width:1px;
+		}
+		.checked{background-color: #aaa;}
+		.rode{background-color: #f00;}
+		.end{background-color: rgb(0,255,255);}
+		.peop{background-color: #00f;}
+	</style>
+</head>
+<body>
+
+<div class="continer action">
+	<input type="text" id="txtNum">
+	<span onclick="setMapSize();">设置地图</span>
+	<span onclick="start();">开始</span>
+	<span onclick="init();">重置</span>
+</div>
+<div class="continer c-map">
+	<ul class="u-map"  id="map">
+	</ul>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+let map = document.getElementById('map');
+let max = 10;
+let mapNode={};
+let found =false;
+let arrow = [[1,0],[0,1],[-1,0],[0,-1]];
+let timmer = [];
+let timeIndex = 0;
+let timeBase = 150;
+init();
+
+function start(){
+	dfs(0,0);
+}
+
+function setMapSize(){
+	max = parseInt(document.getElementById('txtNum').value);
+	init();
+}
+
+function init(){
+	timmer.map((itm)=>{
+		clearTimeout(itm);
+	})
+	timmer = [];
+	timeIndex = 0;
+	mapNode={};
+	found =false;
+	initMap(max);
+}
+
+function initMap(size){
+	map.innerHTML = '';
+	for (let i = 0; i < size; i++) {
+		let ul = document.createElement("ul");
+		if (!mapNode[i]) {
+			mapNode[i] = {};
+		}
+		for (let j = 0; j < size; j++) {
+			let li = document.createElement("li");
+			if (!mapNode[i][j]) {
+				mapNode[i][j] = {visiable:true,node:li,visit:false,isEnd:false};
+			}
+			if (!i && !j) {
+				li.className = 'rode';
+			}else if(i == size-1 && j ==size-1){
+				mapNode[i][j].isEnd = true;
+				li.className = 'end';
+			}else{
+				bindClick(li,i,j);
+			}
+			ul.appendChild(li);
+		}
+		map.appendChild(ul);
+	}
+}
+
+function bindClick(obj,i,j){
+	obj.onclick=()=>{
+		mapNode[i][j] = !mapNode[i][j];
+		if (obj.className.indexOf('checked')>= 0) {
+			obj.className = obj.className.replace('checked','');
+		}else{
+			obj.className = 'checked';
+		}
+		console.log(mapNode);
+	}
+}
+
+function dfs(x,y){
+	timmer.push(setTimeout(((p,q)=>{
+		return function(){
+			removeClass('peop');
+			setClass(mapNode[p][q].node,'peop');
+		}
+	})(x,y),timeBase * (timeIndex ++)));
+
+	if (mapNode[x][y].isEnd) {
+		found = true;
+		return;
+	}
+	mapNode[x][y].visit = true;
+	for (var i = 0; i < arrow.length; i++) {
+		let nx = x + arrow[i][0];
+		let ny = y + arrow[i][1];
+		if (!found && nx >= 0 && ny >=0 && nx < max && ny < max && mapNode[nx][ny].visiable && !mapNode[nx][ny].visit) {
+
+			timmer.push(setTimeout(((p,q)=>{
+				return function(){
+					setClass(mapNode[p][q].node,'rode');
+				}
+			})(nx,ny),timeBase * (timeIndex ++)));
+
+			dfs(nx,ny);
+		}
+	}
+	return false;
+}
+
+function removeClass(cls){
+	Object.keys(mapNode).map((j)=>{
+		Object.keys(mapNode[j]).map((i)=>{
+			let node = mapNode[j][i].node;
+			if (node && node.className && node.className.indexOf(cls) >= 0) {
+				node.className = node.className.replace(cls,'');
+			}
+		})
+	})
+}
+
+function setClass(obj,cls){
+	!obj.className ? (obj.className = cls) : (obj.className += ' '+cls);
+}
+
+</script>
