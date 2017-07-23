@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>深度优先遍历</title>
+	<title>广度优先遍历</title>
 	<style>
 		*{margin: 0; padding: 0;-webkit-user-select:none;}
 		html,body{height: calc(100% - 1px);border-top:1px solid #fff;}
@@ -70,16 +70,16 @@
 <script type="text/javascript">
 let map = document.getElementById('map');
 let max = 10;
-let mapNode={};
+let mapNode=[];
 let found =false;
 let arrow = [[1,0],[0,1],[-1,0],[0,-1]];
 let timmer = [];
 let timeIndex = 0;
-let timeBase = 150;
+let timeBase = 30;
 init();
 
 function start(){
-	dfs(0,0);
+	bfs(mapNode);
 }
 
 function setMapSize(){
@@ -103,12 +103,12 @@ function initMap(size){
 	for (let i = 0; i < size; i++) {
 		let ul = document.createElement("ul");
 		if (!mapNode[i]) {
-			mapNode[i] = {};
+			mapNode[i] = [];
 		}
 		for (let j = 0; j < size; j++) {
 			let li = document.createElement("li");
 			if (!mapNode[i][j]) {
-				mapNode[i][j] = {visiable:true,node:li,visit:false,isEnd:false};
+				mapNode[i][j] = {x:i,y:j,visiable:true,node:li,visit:false,isEnd:false};
 			}
 			if (!i && !j) {
 				li.className = 'rode';
@@ -166,6 +166,52 @@ function dfs(x,y){
 	return false;
 }
 
+let queue = [];
+
+function pop(arr){
+	return arr.shift();
+}
+function bfs(map){
+	queue.push(map[0][0]);
+	while(queue.length)
+	{
+		let step = pop(queue);
+		timmer.push(setTimeout(((st)=>{
+			return function(){
+				setAndRemoveClass(st.node,'peop','peop');
+			}
+		})(step),timeBase * (timeIndex ++)));
+		step.visit = true;
+		for (var i = 0; i < arrow.length; i++) {
+			let ar = arrow[i];
+			let nextRow = map[step.x + ar[0]]
+			let next = !nextRow? null : nextRow[step.y + ar[1]];
+			if (next && next.visiable && !next.visit) {
+				if (next.isEnd) {
+					timmer.push(setTimeout(((st)=>{
+						return function(){
+							setAndRemoveClass(st.node,'peop','peop');
+							alert('逃出生天！');
+						}
+					})(next),timeBase * (timeIndex ++)));
+					return true;
+				}
+				queue.push(next);
+				timmer.push(setTimeout(((st)=>{
+					return function(){
+						setClass(st.node,'rode');
+					}
+				})(next),timeBase * (timeIndex ++)));
+				next.visit = true;
+			}
+		}
+	}
+	timmer.push(setTimeout(()=>{
+		alert('无处可逃！！');
+	},timeBase * (timeIndex ++)));
+	return false;
+}
+
 function removeClass(cls){
 	Object.keys(mapNode).map((j)=>{
 		Object.keys(mapNode[j]).map((i)=>{
@@ -175,6 +221,11 @@ function removeClass(cls){
 			}
 		})
 	})
+}
+
+function setAndRemoveClass(obj,setCls,remCls){
+	removeClass(remCls);
+	setClass(obj,setCls);
 }
 
 function setClass(obj,cls){
