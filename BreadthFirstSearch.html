@@ -72,11 +72,12 @@
 let map = document.getElementById('map');
 let max = 10;
 let mapNode=[];
-let found =false;
 let arrow = [[1,0],[0,1],[-1,0],[0,-1]];
 let timmer = [];
 let timeIndex = 0;
 let timeBase = 30;
+let startNode = null;
+let queue = [];
 init();
 
 function start(){
@@ -93,9 +94,9 @@ function init(){
 		clearTimeout(itm);
 	})
 	timmer = [];
+	queue = [];
 	timeIndex = 0;
 	mapNode={};
-	found =false;
 	initMap(max);
 }
 
@@ -111,8 +112,9 @@ function initMap(size){
 			if (!mapNode[i][j]) {
 				mapNode[i][j] = {x:i,y:j,visiable:true,node:li,visit:false,isEnd:false};
 			}
-			if (!i && !j) {
+			if (i == (Math.floor(size/2)) && j == (Math.floor(size/2))) {
 				li.className = 'rode';
+				startNode = mapNode[i][j] ;
 			}else if(i == size-1 && j ==size-1){
 				mapNode[i][j].isEnd = true;
 				li.className = 'end';
@@ -167,13 +169,12 @@ function dfs(x,y){
 	return false;
 }
 
-let queue = [];
 
 function pop(arr){
 	return arr.shift();
 }
 function bfs(map){
-	queue.push(map[0][0]);
+	queue.push(startNode);
 	while(queue.length)
 	{
 		let step = pop(queue);
