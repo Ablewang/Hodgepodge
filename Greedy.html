@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>贪心算法</title>
+	<style>
+		html,body{height: calc(100% - 1px); border-top:1px solid #fff;-webkit-user-select:none;outline: none;}
+		*{margin:0; padding: 0; font:normal 13px '微软雅黑';}
+		.continer{border:1px dashed #444;margin:10px 15px 0;height: 50px;position: relative;box-sizing: border-box;text-align:center;}
+		.c-action{line-height: 50px;text-align:center;}
+		.c-action > span{display: inline-block;height: 20px;height: 20px;border: 1px solid #888;padding: 0 15px;background-color: #ddd;cursor: pointer;}
+		.c-action span:hover{background-color: #ccc;}
+		.c-action span:active{background-color: #eee;}
+		.c-greedy{height: calc(100% - 70px);}
+		.c-money{display:inline-block;margin-top:20px;border:1px solid #888;padding: 30px;text-align: center;position: relative;vertical-align: top;min-height:206px;}
+		.c-money > span{position: absolute; top:5px;left:50%;transform: translate(-50%);}
+		.c-money li{list-style: none;text-align:center;margin:5px 0;}
+		.c-money li span{display: inline-block;height: 20px;text-align:center;border:1px solid #444;cursor: pointer;}
+		.c-money li span:first-child{width:30px;}
+		.c-change{min-width: 105px;}
+		.c-change li span:last-child{width:50px;}
+		.current{
+			background-color: #f00 !important;
+			color:#fff !important;
+			border-color:rgba(255,0,0,.8) !important;}
+	</style>
+</head>
+<body>
+	<div class="continer c-action" >
+		<span>商品总价：<span id="cost">222</span></span>
+		<input type="text" id="money">
+		<span onclick="getChange();">找钱</span>
+		<span onclick="init();">重置</span>
+	</div>
+	<div class="continer c-greedy" >
+		<div class="c-money">
+			<span>面值</span>
+			<ul id="denomination">
+				<li><span>100</span></li>
+				<li><span>50</span></li>
+				<li><span>20</span></li>
+				<li><span>10</span></li>
+				<li><span>5</span></li>
+				<li><span>2</span></li>
+				<li><span>1</span></li>
+			</ul>
+		</div>
+		<div class="c-money c-change">
+			<span id="change">找零</span>
+			<ul id="changeList">
+			</ul>
+		</div>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+let changeList = document.getElementById('changeList');
+let mDeno={};
+let denoArr = [];
+let timmer = [];
+let timeIndex = 0;
+let timeBase = 300;
+
+function init(){
+	changeList.innerHTML= '';
+	mDeno={};
+	denoArr = [];
+	timeIndex = 0;
+	timmer.map((itm)=>{
+		clearTimeout(itm);
+	})
+	timmer = [];
+	getDeno();
+}
+
+function getDeno(){
+	let denos = document.getElementById('denomination').getElementsByTagName('span');
+	for (var i = 0; i < denos.length; i++) {
+		let itm = denos[i];
+		let deno = parseInt(itm.innerHTML);
+		mDeno[deno] = {node:itm,num:0};
+		denoArr.push(deno);
+	}
+}
+
+function getChange(){
+	init();
+	let money = parseInt( document.getElementById('money').value);
+	let cost = parseInt(document.getElementById('cost').innerHTML);
+	document.getElementById('change').innerHTML = money - cost;
+	let result = giveMoney(money - cost);
+	result ? draw() : '';
+}
+
+function giveMoney(target) {
+	if (!target || target < 0 ) {
+		alert('大哥，别逗！要不先回去接个外包赚够钱再来？')
+		return false;
+	}
+    let k = denoArr.length;
+    let num = [];
+    denoArr.map((itm,i)=>{
+    	num[i] = Math.floor(target / itm);
+        mDeno[itm].num = num[i];
+        target = target % itm;
+    })
+    return true;
+}
+
+function draw(){
+	 denoArr.map((itm,i)=>{
+	 	let deno = mDeno[itm];
+	 	timmer.push(setTimeout(()=>{
+	 		clearClass('current');
+	 		deno.node.className = 'current';
+	 	},timeBase * (timeIndex ++)));
+	 	if (deno.num > 0) {
+	 		for (let i = 0; i < deno.num; i++) {
+			 	timmer.push(setTimeout(()=>{
+			 		let change = document.getElementById('change'+itm);
+			 		if (change) {
+			 			let n = document.getElementById('changeNum'+itm);
+			 			n.innerHTML = parseInt(n.innerHTML) + 1;
+			 		}else{
+			 			let li = document.createElement('li');
+			 			li.innerHTML = '<span id="change'+itm+'">'+itm+'</span> × <span id="changeNum'+itm+'">1</span>';
+			 			changeList.appendChild(li);
+			 		}
+			 	},timeBase * (timeIndex ++)));
+	 		}
+	 	}
+    })
+}
+
+function clearClass(cls){
+	Object.keys(mDeno).map((itm)=>{
+		mDeno[itm].node.className = mDeno[itm].node.className.replace(cls,'');
+	})
+}
+</script>
