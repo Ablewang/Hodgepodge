@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Vue入门练习</title>
+	<script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+	<div id="app">
+		{{message}}
+	</div>
+	<div id="app2">
+		<span v-bind:title="message">
+		鼠标悬停几秒钟查看此处动态绑定的提示信息！
+		</span>
+	</div>
+	<div id="app3">
+		<p v-if="seen">现在你看到我了</p>
+	</div>
+	<div id="app4">
+		<ol>
+			<li v-for="item in todos">
+			{{item.seen ? item.text : '我被隐藏啦'}}
+			</li>
+		</ol>
+	</div>
+	<div id="app5">
+		<p>{{message}}</p>
+		<button v-on:click="reverseMessage">逆转消息</button>
+	</div>
+	<div id="app6">
+		<p>{{message}}</p>
+		<input type="text" v-model="message">
+	</div>
+	<div id="app7">
+		<ol>
+			<todo-item
+				v-for="item in groceryList"
+				v-bind:todo="item"
+				v-bind:key="item.id"
+			></todo-item>
+		</ol>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	var app = new Vue({
+		el:'#app',
+		data:{
+			message:'Hello vue!'
+		}
+	})
+	var app2 = new Vue({
+		el:'#app2',
+		data:{
+			message:'页面加载于 ' + new Date()
+		}
+	})
+	var app3 = new Vue({
+		el:'#app3',
+		data:{
+			seen:true
+		}
+	})
+	var app4 = new Vue({
+		el:'#app4',
+		data:{
+			todos:[
+				{text:'学习 JavaScript',seen:true},
+				{text:'学习 Vue',seen:true},
+				{text:'整个牛项目',seen:false}
+			]
+		}
+	})
+	var app5 = new Vue({
+		el:'#app5',
+		data:{
+			message:'Hello vue.js'
+		},
+		methods:{
+			reverseMessage:function(){
+				this.message = this.message.split(' ').reverse().join(' ');
+			}
+		}
+	})
+	var app6 = new Vue({
+		el:'#app6',
+		data:{
+			message:'Hello Vue!'
+		}
+	})
+	Vue.component('todo-item',{
+		props:['todo'],
+		template:'<li>{{todo.text}}</li>'
+	})
+
+	var app7 = new Vue({
+		el:'#app7',
+		data:{
+			groceryList:[
+				{id:0,text:'蔬菜'},
+				{id:1,text:'奶酪'},
+				{id:2,text:'随便其他什么'}
+			]
+		}
+	})
+</script>

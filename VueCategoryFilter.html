@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style type="text/css">
+		*{margin:0;padding: 0;font:normal 13px '微软雅黑';-webkit-user-select:none;}
+		#app{
+			display: inline-block;
+			min-height: 200px;
+			width: calc(100% - 60px);
+			margin:20px 30px;
+			border:1px solid #888;
+			padding: 20px 0;
+		}
+		#app > span{margin:0 30px;padding-bottom: 10px;display: block;border-bottom: 1px solid #888;}
+		.c-catg ul{list-style: none;text-align: left;margin:15px 0 0 25px;padding: 0;}
+		.c-catg li{display: inline-block;margin-right:20px;color:#888;cursor: pointer;padding: 0 5px;}
+		.c-catg li:hover{background-color: #ddd;}
+		.c-catg li:active{background-color: #eee;}
+		.c-catg li:first-child{margin-right:30px;color:#444;font-weight: bolder;}
+		.c-catg .selected { background-color: #E40E98;color: #fff; }
+		.c-catg .selected:hover{ background-color: #E633A7;}
+		.c-catg .selected:active{ background-color: #EA0299;}
+	</style>
+	<script src="./Scripts/vue-2.4.2.js"></script>
+</head>
+<body>
+	<div id="app">
+		<span>筛选条件</span>
+		<div class="c-catg" id="categories" v-for="cateUl in categoryList">
+			<ul>
+				<li>{{cateUl.title}}</li>
+				<li v-for="category in cateUl.items" v-on:click="select(this)">{{category.text}}</li>
+			</ul>
+		</div>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+let categories = [{
+	title:'项目阶段',
+	items:[{index:0,text:'A轮'},{index:1,text:'B轮'},{index:2,text:'C轮'},{index:3,text:'D轮'}]
+},{
+	title:'所属行业',
+	items:[{index:10,text:'汽车'},{index:11,text:'健康'},{index:12,text:'IT'},{index:13,text:'食品'}]
+},{
+	title:'所属区域',
+	items:[{index:20,text:'华东'},{index:21,text:'华北'},{index:22,text:'华南'},{index:23,text:'华中'},{index:24,text:'华西南'},{index:25,text:'东北'}]
+}];
+Vue.component('cate-item',{
+	props:['category'],
+	template:'<li>{{category.text}}</li>'
+})
+
+let app = new Vue({
+	el:'#app',
+	data:{
+		categoryList:categories
+	},
+	methods:{
+		select:function(parms){
+			let li = event.target || null;
+			if (li) {
+				let ulLis = li.parentNode.children;
+				setClassAfterClear(ulLis,'selected',li);
+			}
+		}
+	}
+})
+
+function setClassAfterClear(clearList,className,target){
+	for (var i = 0; i < clearList.length; i++) {
+		clearList[i].className = clearList[i].className.replace(className,'');
+	}
+	target.className += className;
+}
+</script>
