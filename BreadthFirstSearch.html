@@ -139,37 +139,6 @@ function bindClick(obj,i,j){
 	}
 }
 
-function dfs(x,y){
-	timmer.push(setTimeout(((p,q)=>{
-		return function(){
-			removeClass('peop');
-			setClass(mapNode[p][q].node,'peop');
-		}
-	})(x,y),timeBase * (timeIndex ++)));
-
-	if (mapNode[x][y].isEnd) {
-		found = true;
-		return;
-	}
-	mapNode[x][y].visit = true;
-	for (var i = 0; i < arrow.length; i++) {
-		let nx = x + arrow[i][0];
-		let ny = y + arrow[i][1];
-		if (!found && nx >= 0 && ny >=0 && nx < max && ny < max && mapNode[nx][ny].visiable && !mapNode[nx][ny].visit) {
-
-			timmer.push(setTimeout(((p,q)=>{
-				return function(){
-					setClass(mapNode[p][q].node,'rode');
-				}
-			})(nx,ny),timeBase * (timeIndex ++)));
-
-			dfs(nx,ny);
-		}
-	}
-	return false;
-}
-
-
 function pop(arr){
 	return arr.shift();
 }

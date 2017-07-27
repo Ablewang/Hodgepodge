@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>随机图</title>
+	<style>
+		*{margin:0;padding: 0; font:normal 13px '微软雅黑';color:#888;-webkit-user-select:none;}
+		html,body{width:100%; height: calc(100% - 1px);border-top:1px solid #fff;}
+		.continer,#canvas{margin:10px 15px 0;min-height: 50px;border:1px dashed #444;}
+		.action{line-height: 50px;text-align: center;}
+		.action input[type='button']{padding: 0 5px;outline: none;cursor: pointer;}
+		#map{position: relative;height: calc(100% - 80px);}
+		#map > span{
+			height: 26px;
+			width: 26px;
+			display: block;
+			border:1px solid #888;
+			position: absolute;
+			text-align:center;
+			line-height: 26px;	
+			background-color: #eee;
+			cursor: pointer;
+		}
+		#map > span:hover{background-color: #ddd;}
+		#canvas{
+			border:none;
+			position: absolute;
+			top: 65px;
+			z-index: -1;
+		}
+	</style>
+</head>
+<body>
+	<div class="continer action">
+		<span>入度</span>
+		<input id="inC" type="text">
+		<span>出度</span>
+		<input id="outC" type="text">
+		<input type="button" value="生成" onclick="setConfig();">
+	</div>
+	<div class="continer" id="map">
+
+	</div>
+	<canvas id="canvas"></canvas>
+</body>
+</html>
+<script type="text/javascript">
+let maxIn = 1,
+	maxOut = 1,
+	maxCount = 10;
+let mapNode = [],
+	nodeAlowIn = {},
+	nodeOutNum = {};
+
+let mapDiv = document.getElementById('map');
+let canvas = document.getElementById('canvas');
+let ctx = canvas.getContext('2d');
+canvas.height = mapDiv.offsetHeight;
+canvas.width = mapDiv.offsetWidth;
+
+function setConfig(){
+	let inC = parseInt(document.getElementById('inC').value);
+	let outC = parseInt(document.getElementById('outC').value);
+	if (isNaN(inC) || isNaN(outC) || inC < 1 || outC < 1) {
+		alert('别闹');
+		return;
+	}
+	init(inC,outC);
+	clearCanvas();
+	initMap(maxCount);
+	getRelation();
+}
+
+function init(maxIn,maxOut){
+	maxIn = maxIn;
+	maxOut = maxOut;
+	mapNode = [];
+	nodeAlowIn = {};
+	nodeOutNum = {};
+}
+
+function initMap(num){
+    //中心点横坐标
+    var dotLeft = mapDiv.offsetWidth/2;
+    //中心点纵坐标
+    var dotTop = mapDiv.offsetHeight/2;
+    //起始角度
+    var stard = 0;
+    //半径
+    var radius = 200;
+    //每一个BOX对应的角度;
+    var avd = 360/num;
+    //每一个BOX对应的弧度;
+    var ahd = avd*Math.PI/180;
+        
+	for (var i = 1; i <= num; i++) {
+		let span = document.createElement('span');
+		span.innerHTML = i;
+		let lf =  Math.sin((ahd * (i - 1))) * radius+dotLeft;
+		let tp =  Math.cos((ahd * (i - 1))) * radius+dotTop;
+		span.style.left = lf + 'px';
+		span.style.top = tp + 'px';
+		mapDiv.appendChild(span);
+		mapNode[i]={
+			index:i,
+			node:span,
+			inCount: 0,
+			center: [lf + span.offsetWidth/2,tp + span.offsetHeight/2]
+		};
+		nodeAlowIn[i] = 0;
+	}
+}
+
+function getRelation(){
+	mapNode.map((item)=>{
+		if (Object.keys(nodeAlowIn).length > 0) {
+			let mNum = 1 + Math.ceil(Math.random() * (maxOut - 1));
+			item.relation = [];
+			mNum = mNum > Object.keys(nodeAlowIn).length ? Object.keys(nodeAlowIn).length : mNum;
+			while(mNum > 0){
+				let last = Object.keys(nodeAlowIn).length;
+				let rKey = Math.floor(Math.random() * last);
+				r = parseInt( Object.keys(nodeAlowIn)[rKey]);
+				if (r != item.index && !item.relation[r] && mapNode[r].inCount < maxIn) {
+					item.relation[r] = true;
+					mapNode[r].inCount ++;
+					if (mapNode[r].inCount >= maxIn) {
+						delete nodeAlowIn[r]
+					}
+					drawLine(item.center,mapNode[r].center)
+					mNum --;
+				}
+			}
+		}
+	})
+}
+
+function clearCanvas(){
+	ctx.fillStyle="#fff";
+	ctx.fillRect(canvas.offsetLeft,canvas.offsetTop,canvas.offsetLeft + canvas.offsetWidth,canvas.offsetTop + canvas.offsetHeight);
+}
+
+function drawLine(center1,center2){
+	let middle = [center1[0] + (center2[0] - center1[0]) / 3,center1[1] + (center2[1] - center1[1]) / 3]
+	drawDirectionLine(center1[0],center1[1],middle[0],middle[1]);
+	ctx.moveTo(middle[0],middle[1]);
+	ctx.lineTo(center2[0],center2[1]);
+	ctx.stroke();
+}
+
+function drawDirectionLine(x1, y1, x2, y2) {
+	var angle = Math.abs(Math.atan((x2 - x1) / (y2 - y1))); //倾斜角余角
+	var length = 10; //箭头斜线长度
+	var degree = Math.PI / 6; //箭头倾斜角
+	var theta = 0;
+	var altha = 0;
+	var a1 = 0;
+	var b1 = 0;
+	var a2 = 0;
+	var b2 = 0;
+
+
+	if (angle >= degree && angle <= Math.PI / 2 - degree) {
+		theta = angle - degree;
+		altha = Math.PI / 2 - 2 * degree - theta;
+		if (x2 >= x1) {
+			a1 = x2 - length * Math.sin(theta);
+			a2 = x2 - length * Math.cos(altha);
+		} else {
+			a1 = x2 + length * Math.sin(theta);
+			a2 = x2 + length * Math.cos(altha);
+		}
+		if (y2 >= y1) {
+			b1 = y2 - length * Math.cos(theta);
+			b2 = y2 - length * Math.sin(altha);
+		} else {
+			b1 = y2 + length * Math.cos(theta);
+			b2 = y2 + length * Math.sin(altha);
+		}
+	} else {
+		theta = angle - degree;
+		altha = theta + 2 * degree - Math.PI / 2;
+		if (x2 >= x1 && y2 >= y1) {
+			a1 = x2 - length * Math.sin(theta);
+			b1 = y2 - length * Math.cos(theta);
+			a2 = x2 - length * Math.cos(altha);
+			b2 = y2 + length * Math.sin(altha);
+		} else if (x2 >= x1 && y2 < y1) {
+			a1 = x2 - length * Math.sin(theta);
+			b1 = y2 + length * Math.cos(theta);
+			a2 = x2 - length * Math.cos(altha);
+			b2 = y2 - length * Math.sin(altha);
+		} else if (x2 < x1 && y2 < y1) {
+			a1 = x2 + length * Math.sin(theta);
+			b1 = y2 + length * Math.cos(theta);
+			a2 = x2 + length * Math.cos(altha);
+			b2 = y2 - length * Math.sin(altha);
+		} else {
+			a1 = x2 + length * Math.sin(theta);
+			b1 = y2 - length * Math.cos(theta);
+			a2 = x2 + length * Math.cos(altha);
+			b2 = y2 + length * Math.sin(altha);
+		}
+	}
+
+	ctx.beginPath();
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+	ctx.lineTo(a1, b1);
+	ctx.stroke();
+	ctx.moveTo(x2, y2);
+	ctx.lineTo(a2, b2);
+	ctx.stroke();
+}
+</script>
