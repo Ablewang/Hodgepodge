@@ -1,0 +1,53 @@
+.halo-slide {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        position: absolute;
+    }
+    
+    .heart-warp {
+        width: 70.71%;
+        height: 70.71%;
+        position: relative;
+        transform: rotate(45deg);
+        left: 14.15%;
+        top: 2.15%;
+    }
+    
+    .halo-cicle1 {
+        width: 66.66%;
+        height: 66.66%;
+        border-radius: 50%;
+        background: #048623;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+    }
+    
+    .halo-cicle2 {
+        width: 66.66%;
+        height: 66.66%;
+        border-radius: 50%;
+        background: #062461;
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+    
+    .halo-squre {
+        width: 66.66%;
+        height: 66.66%;
+        background: #f02456;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
+    
+    @keyframes rotate-frame {
+        from {
+            transform: rotateX(0) rotateY(360deg);
+        }
+        to {
+            transform: rotateX(0) rotateY(0);
+        }
+    }

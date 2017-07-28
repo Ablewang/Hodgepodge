@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>动态生成树菜单</title>
+	<link rel="stylesheet" href="./CSS/3dHeart.css">
+	<script src="./Scripts/3dHeart.js"></script>
+	<style type="text/css">
+		*{margin:0;-webkit-user-select:none;}
+		.c-tree{text-align: center;}
+		#div_tree{padding: 0;border:1px solid #888;padding: 40px;min-width: 300px;display: inline-block;text-align: left;}
+
+		/*#div_tree{animation:turn 3s linear infinite;}*/
+		/*#div_tree:hover{animation:none;}*/
+		#div_tree span{
+			display: block;
+			padding:2px  5px;
+			font:normal 13px '微软雅黑';
+			cursor: pointer;
+			height: 30px;
+			width: 100%;
+			line-height: 30px;
+			border-bottom: 1px solid #ddd;
+			position: relative;
+		}
+		#div_tree span:hover{background-color: #eee;}
+		#div_tree .par-span::before{
+			content: '-';
+			display: inline-block;
+			margin-right: 5px;
+			border:1px solid #444;
+			height: 12px;
+			width: 12px;
+			line-height: 12px;
+			font-size: 12px;
+			border-radius: 2px; 
+			text-align: center;
+		}
+		#div_tree .par-span-s::before{
+			content: '+';
+		}
+		#div_tree span .heartbox{display: inline-block;height: 30px;width: 30px;vertical-align: middle;position: relative;}
+		#div_tree span .heart{position: relative;}
+		@keyframes turn{
+			0%{transform: rotateY(0);}
+			100%{transform: rotateY(360deg);}
+		}
+	</style>
+</head>
+<body>
+	<div class="c-tree">
+		<div id="div_tree" >
+			
+		</div>
+	</div>
+</body>
+</html>
+
+<script type="text/javascript">
+let data=[{
+	index:1,
+	parent:0,
+	text:'类别1'
+},{
+	index:2,
+	parent:1,
+	text:'类别1.1'
+},{
+	index:3,
+	parent:1,
+	text:'类别1.2'
+},{
+	index:4,
+	parent:2,
+	text:'类别1.2.1'
+},{
+	index:5,
+	parent:2,
+	text:'类别1.2.2'
+},{
+	index:6,
+	parent:2,
+	text:'类别1.2.3'
+},{
+	index:7,
+	parent:6,
+	text:'类别1.2.3.1'
+},{
+	index:8,
+	parent:1,
+	text:'类别1.3'
+},{
+	index:9,
+	parent:1,
+	text:'类别1.4'
+},{
+	index:10,
+	parent:0,
+	text:'类别2'
+},{
+	index:11,
+	parent:10,
+	text:'类别2.1'
+},{
+	index:12,
+	parent:10,
+	text:'类别2.2'
+}];
+
+let treeNode = {};
+let treeStruct = {};
+let treeDiv = document.getElementById('div_tree');
+
+initTreeNode(data);
+initTree();
+drawHeart('heart');
+function initTreeNode(nodes){
+	nodes.map((itm)=>{
+		treeNode[itm.index] = itm;
+		!treeStruct[itm.parent] ? (treeStruct[itm.parent] = [itm.index]) : (treeStruct[itm.parent].push(itm.index));
+	})
+	console.log(treeStruct);
+}
+
+function initTree(){
+	let treeHTML = '';
+	let rootNode =getRootIndex();
+	treeHTML = getTreeHTML(treeStruct[rootNode]);
+	treeDiv.innerHTML = treeHTML;
+}
+
+function getTreeHTML(rot){
+	let html = '';
+	if (rot) {
+		rot.map((itm)=>{
+			let child = getTreeHTML(treeStruct[itm]);
+			html += '<div >'
+			html += '<span onclick="slide(this,'+itm+');" class="heartNode '+(child.length>0?'par-span' : '')+'">'+ treeNode[itm].text +'<div class="heartbox"><div class="heart"></div></div></span>';
+			if (child.length > 0) {
+				html += '<ul data-slide='+itm+'>'+ child +'</ul>';
+			}
+			html += '</div>'
+		});
+	}
+	return html;
+}
+
+function getRootIndex(){
+	for (var i in treeStruct) {
+		if (!treeNode[i]) {
+			return i;
+		}
+	}
+}
+
+function slide(obj,idx){
+	let ul = getElementByAttr('ul','data-slide',idx);
+	if (ul) {
+		ul.hidden = !ul.hidden;
+		obj.className = ul.hidden ?  (obj.className + ' par-span-s') : obj.className.replace(' par-span-s','')
+		if (ul.hidden) {
+			obj.className.replace(' par-span-s','')
+		}
+	}
+}
+
+function getElementByAttr(tag,attr,value){
+	let tagList = document.getElementsByTagName(tag);
+	for (var i = 0; i < tagList.length; i++) {
+		if (tagList[i].getAttribute(attr) == value) {
+			return tagList[i];
+		}
+	}
+	return null;
+}
+
+</script>

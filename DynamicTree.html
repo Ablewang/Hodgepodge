@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>动态生成树</title>
+	<link rel="stylesheet" href="./CSS/3dHeart.css">
+	<script src="./Scripts/3dHeart.js"></script>
+	<style>
+		*{margin:0; padding: 0;font:normal 13px '微软雅黑';-webkit-user-select:none;}
+		html,body{height: calc(100% - 1px);width: 100%;border-top:1px solid #fff;}
+		.continer{
+			margin:10px 15px 0;
+			min-height: 50px;
+			border:1px dashed #888;
+			box-sizing: border-box;
+			position: relative;
+		}
+		.continer .action{
+			position: absolute;
+			display: inline-block;
+			top: 50%;
+			left:10px;
+			transform: translate(0,-50%);
+		}
+		li{
+			display: inline-block;
+			list-style: none;
+			width: 30px;
+			height: 30px;
+			line-height: 30px;
+			border:1px solid #ddd;
+			text-align: center;
+			border-radius: 5px;
+			color: #fff;
+			background-color: rgba(128,0,255,.8);
+			margin:0 5px;
+			cursor: pointer;
+		}
+		li:hover{background-color: rgba(128,0,255,.9);}
+		li:active{background-color: rgba(128,0,255,.5);}
+
+		.action li{
+			padding: 0 5px;
+			height: 20px;
+			line-height: 20px;
+			background-color: #ddd;
+			color:#444;
+			border-radius: 3px;
+		}
+		.action li:hover{background-color: #ccc;}
+		.action li:active{background-color: #eee;}
+
+		#orgArr{height: 50px;line-height: 50px;text-align: center;}
+		#treeContiner{
+			width:calc(100% - 30px); min-height: calc(100% - 80px);position: absolute;
+		}
+		.c-randomTree,#tree{width:100%; min-height:100%;position: absolute;z-index: 9999;}
+		#randomTree{z-index: 10002;}
+		#randomTree > span{
+			display: inline-block;
+			width: 30px;
+			height: 30px;
+			line-height: 30px;
+			border:1px solid #ddd;
+			text-align: center;
+			border-radius: 5px;
+			color: #fff;
+			margin:0 5px;
+			cursor: pointer;
+			position: absolute;
+			margin:0;
+			z-index: 10003;
+		}
+		#canvas{border:none;}
+		
+		.heart{
+			position: absolute;
+		    height: 100%;
+		    width: 100%;
+		    top: 0;
+		    left: 0;
+		    z-index: 10001;
+		}
+		#tree{
+			animation: turn 4s linear infinite;
+		}
+		@keyframes turn{
+			0%{transform: rotateY(0);}
+			100%{transform: rotateY(360deg);}
+		}
+		.anim-close{
+			animation:none !important;
+		}
+	</style>
+</head>
+<body>
+<div class="continer">
+	<ul class="action">
+		<li onclick="treeAnimate(1);">停止</li>
+		<li onclick="treeAnimate(2);">开始</li>
+		<li onclick="treeAnimate(3);">翻转</li>
+	</ul>
+	<ul id="orgArr"></ul>
+</div>
+<div class="continer" id="treeContiner">
+	<div id="tree">
+		<div class="c-randomTree" id="randomTree">
+		</div>
+		<canvas class="c-randomTree" id="canvas"></canvas>
+	</div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+	let orgUl = document.getElementById('orgArr');
+	let randomTreeTree = document.getElementById('randomTree');
+	let nodeArray = [];
+	let maxCount = 20;
+	let min = 8;
+	let randomArray = getRandomArray(maxCount,100,min);
+	let orgNode = {},layerNode = {},orgKeys =[];
+	let treeNode = {},rootNode = null;
+
+	let timmer = [];
+	let timeIdx = 0;
+	let timeBase = 400;
+	let canvas = document.getElementById('canvas');
+	canvas.height = randomTreeTree.offsetHeight;
+	canvas.width = randomTreeTree.offsetWidth;
+	let ctx = canvas.getContext('2d');
+
+	let space ={
+		2:250,
+		3:125,
+		4:62.5,
+		5:31.25,
+		6:15.625,
+		7:7.8125
+	}
+	let treeLayerNum ={};
+	drawOrginLi(randomArray);
+	initTreeNode();
+	drawTree(rootNode,null,'middle');
+	drawHeart('heart');
+	// initrandomTree(randomArray);
+
+	function drawOrginLi(arr){
+		orgUl.innerHTML = '';
+		arr.map((itm)=>{
+			let li = document.createElement('li');
+			li.innerHTML = itm;
+			orgNode[itm] = {index:itm,node:li}
+			orgUl.appendChild(li);	
+		})
+	}
+
+	function initTreeNode(){
+		let layer = 1;
+		let rootIndex = -1;
+		while(!orgNode[rootIndex])rootIndex =min + Math.floor(Math.random() * maxCount);
+		console.log(rootIndex);
+		rootNode = orgNode[rootIndex];
+		rootNode.layer = layer;
+		layerNode[layer] = [rootNode];
+		delete orgNode[rootIndex];
+		orgKeys = Object.keys(orgNode);
+		while(orgKeys.length > 0){
+			let i = 0,max = Math.pow(2,layer - 1);
+			layerNode[++layer] = [];
+			layerNode[layer - 1].map((itm)=>{
+				getChild('left',itm,layer);
+				getChild('right',itm,layer);
+			});
+		}
+	}
+
+	function drawTree(node,parent,side){
+		if (node) {
+			let span = createNode(node.index,node.layer,parent,side);
+			randomTreeTree.appendChild(span);
+			if (parent) {
+				drawLine(getCenterPoint(parent),getCenterPoint(span));
+			}
+			drawTree(node.left,span,'left');
+			drawTree(node.right,span,'right');
+		}
+	}
+
+	function getChild(side,itm,layer){
+		let rootIndex =orgKeys[Math.floor(Math.random() * orgKeys.length)];
+		let rand = 1/layer + Math.random();
+		if (rand > 0.5 && orgKeys.length > 0 ) {
+			itm[side] = orgNode[rootIndex];
+			orgNode[rootIndex].layer = layer;
+			layerNode[layer].push(orgNode[rootIndex]);
+			delete orgNode[rootIndex];
+			orgKeys = Object.keys(orgNode);
+		}
+	}
+
+	function createNode(data,layer,parent,side){
+		let base = side == 'left' ? -1 : 1;
+		let sp = (space[layer] || 0) * base;
+		let span = document.createElement('span');
+		span.innerHTML = data + '<div class="heart"></div>';
+		let left = (!parent ? randomTreeTree.offsetWidth/2 : (parent.offsetLeft + sp + 15));
+		let top = (!parent ? 30 : parent.offsetTop + 50 + 15);
+		span.style.left = left -15 + 'px';
+		span.style.top = top + 'px';
+		span.className = 'new-Itm';
+		treeNode[data] = span;
+		return span;
+	}
+
+	function clearClassName(cls){
+		for (var i in treeNode) {
+			treeNode[i].className = treeNode[i].className.replace(cls,'');
+		}
+		setAddedSign();
+	}
+
+	function getCenterPoint(obj){
+		if (!obj) {
+			return [0,0];
+		}
+		let x = (parseInt(obj.style.left.replace('px','')) || 0)+ (obj.offsetWidth / 2 || 0);
+		let y = (parseInt(obj.style.top.replace('px','')) || 0) + (obj.offsetHeight / 2 || 0);
+		return [x,y];
+	}
+
+	function drawLine(center1,center2){
+		ctx.moveTo(center1[0],center1[1]);
+		ctx.lineTo(center2[0],center2[1]);
+		ctx.stroke();
+	}
+
+	function getRandomArray(len,max,min){
+		let temp = [];
+		let res = [];
+		for (var i = 1; i <=max; i++) {
+			temp.push(i + (min || 0));
+		}
+		max --;
+		while(res.length < len){
+			let idx = Math.floor(Math.random() * max);
+			res.push(temp[idx]);
+			temp[idx] = temp[max --];
+		}
+		return res;
+	}
+	let curDeg = 0;
+	function treeAnimate(action){
+		let tree = document.getElementById('tree');
+		switch(action){
+			case 1:tree.className += ' anim-close';break;
+			case 2:tree.className = '';break;
+			case 3:tree.className += ' anim-close';
+				curDeg += 180;
+				curDeg %= 360;
+                tree.style.transform = 'rotateY('+curDeg+'deg)';
+				break;
+		}
+	}
+</script>
